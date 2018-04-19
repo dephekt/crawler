@@ -1,7 +1,6 @@
 from lxml import html
 import requests
 
-
 def read_infile(infile='scanner_domains.txt') -> list:
     """Loads an input file containing a list of domains to scan.
 
@@ -47,30 +46,53 @@ def scan(domains: list) -> tuple:
 
             # Make a GET request to the domain
             r = requests.get('http://' + domain + '/')
-            statuscode = r.status_code
 
             # Store the elements to a tree to reference later
             root = html.fromstring(r.content)
 
             # Store the address of the page title element
-            title = root.xpath('/html/head/title')
+            title_path = root.xpath('/html/head/title')
+            if type(title_path) is list:
+                title = title_path[0].text
+            else:
+                title = None
 
             # Store the address of the meta description content element
-            desc = root.xpath('/html/head/meta[@name="description"]/@content')
+            desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
+            if type(desc_path) is list:
+                desc = desc_path[0]
+            else:
+                title = None
 
-            # Return a tuple of the domain, title and description
-            return domain, title, desc, statuscode
+            # Return a tuple of the domain, title, description and HTTP status code
+            return domain, title, desc, r.status_code
         except:
             return None
 
     return None
 
 
-def write_result(results: tuple) -> bool:
-    #urltitle = title[0].text
-    #urltitle = str(None)
-    #url_desc = desc[0]
-    #url_desc = str(None)
+def write_outfile(results: tuple) -> bool:
+    """Writes results as tuples to the output log file.
+    
+    Parameters
+    ----------
+    results : tuple
+        A tuple of metadata to be logged.
+    
+    Returns
+    -------
+    bool
+        Returns ``True`` if the operation was successful, ``False`` otherwise.
+    """
+    try:
+        # Open the output log file and write incoming tuples to it.
+        with open(scanner_domains.txt, 'a') as f:
+            print(str(results), file=f)
+            f.close()
+            return True
+    except:
+        print('Unable to open output file: ' + outfile)
+        return False
 
-    print(str(results))
     return False
