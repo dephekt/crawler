@@ -27,12 +27,12 @@ def read_infile(infile='scanner_domains.txt') -> list:
         return [None]
 
 
-def scan(domains: list) -> tuple:
+def scan(domain: str) -> tuple:
     """Scans a list of domains for relevant metadata.
 
     Parameters
     ----------
-    domains : list
+    domain : str
         A list of domains to scan for metadata.
 
     Returns
@@ -40,34 +40,31 @@ def scan(domains: list) -> tuple:
     tuple
         Returns a tuple of results.
     """
-    while domains:
-        # Pop the first domain from the stack
-        domain = domains.pop().strip()
-        try:
-            # Make a GET request to the domain
-            r = requests.get('http://' + domain + '/')
+    try:
+        # Make a GET request to the domain
+        r = requests.get('http://' + domain + '/')
 
-            # Store the elements to a tree to reference later
-            root = html.fromstring(r.content)
+        # Store the elements to a tree to reference later
+        root = html.fromstring(r.content)
 
-            # Store the address of the page title element
-            title_path = root.xpath('/html/head/title')
-            if type(title_path) is list:
-                title = title_path[0].text
-            else:
-                title = None
+        # Store the address of the page title element
+        title_path = root.xpath('/html/head/title')
+        if type(title_path) is list:
+            title = title_path[0].text
+        else:
+            title = None
 
-            # Store the address of the meta description content element
-            desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
-            if type(desc_path) is list:
-                desc = desc_path[0]
-            else:
-                desc = None
+        # Store the address of the meta description content element
+        desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
+        if type(desc_path) is list:
+            desc = desc_path[0]
+        else:
+            desc = None
 
-            # Return a tuple of the domain, title, description and HTTP status code
-            return domain, title, desc, r.status_code
-        except:
-            return domain, None, None, "request failure"
+        # Return a tuple of the domain, title, description and HTTP status code
+        return domain, title, desc, r.status_code
+    except:
+        return domain, None, None, "request failure"
 
 
 def write_outfile(results: tuple) -> bool:
