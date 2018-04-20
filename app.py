@@ -1,6 +1,5 @@
 import crawler
 import argparse
-import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--scan', help='perform a scan', action='store_true')
@@ -10,17 +9,7 @@ args = parser.parse_args()
 
 
 while args.scan:
-    infile_present = os.path.exists(args.infile)
-    outfile_present = os.path.exists(args.outfile)
-    
-    infile = args.infile
-    outfile = args.outfile
-    
-    if (infile_present and outfile_present):
-        stack = crawler.read_infile(infile)
-        scan_results = crawler.scan(stack)
-        log_status = crawler.write_outfile(outfile)
-    elif infile_present = False:
-        print('Input file does not exist... doing nothing.')
-    elif outfile_present = False:
-        print('Output file does not exist... doing nothing.')
+    stack = crawler.read_infile()
+    scan_results = crawler.scan(stack)
+    log_status = crawler.write_outfile(scan_results)
+    print(str(scan_results), str(log_status))

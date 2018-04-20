@@ -1,6 +1,7 @@
 from lxml import html
 import requests
 
+
 def read_infile(infile='scanner_domains.txt') -> list:
     """Loads an input file containing a list of domains to scan.
 
@@ -23,7 +24,7 @@ def read_infile(infile='scanner_domains.txt') -> list:
             return stack
     except:
         print('Unable to open input file: ' + infile)
-        return None
+        return [None]
 
 
 def scan(domains: list) -> tuple:
@@ -37,13 +38,12 @@ def scan(domains: list) -> tuple:
     Returns
     -------
     tuple
-        Returns a tuple of results if successful, ``None`` otherwise.
+        Returns a tuple of results.
     """
     while domains:
+        # Pop the first domain from the stack
+        domain = domains.pop().strip()
         try:
-            # Pop the first domain from the stack
-            domain = domains.pop().strip()
-
             # Make a GET request to the domain
             r = requests.get('http://' + domain + '/')
 
@@ -62,24 +62,22 @@ def scan(domains: list) -> tuple:
             if type(desc_path) is list:
                 desc = desc_path[0]
             else:
-                title = None
+                desc = None
 
             # Return a tuple of the domain, title, description and HTTP status code
             return domain, title, desc, r.status_code
         except:
-            return None
-
-    return None
+            return domain, None, None, "request failure"
 
 
 def write_outfile(results: tuple) -> bool:
     """Writes results as tuples to the output log file.
-    
+
     Parameters
     ----------
     results : tuple
         A tuple of metadata to be logged.
-    
+
     Returns
     -------
     bool
@@ -87,12 +85,10 @@ def write_outfile(results: tuple) -> bool:
     """
     try:
         # Open the output log file and write incoming tuples to it.
-        with open(scanner_domains.txt, 'a') as f:
+        with open('scanner_log.txt', 'a') as f:
             print(str(results), file=f)
             f.close()
             return True
     except:
-        print('Unable to open output file: ' + outfile)
+        print('Unable to open output file')
         return False
-
-    return False
