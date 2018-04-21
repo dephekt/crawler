@@ -8,7 +8,7 @@ def read_infile(infile='scanner_domains.txt') -> list:
     Parameters
     ----------
     infile : str
-        Filesystem path to the local input file to use.
+        A string containing the location of the output log file.
         Uses ``scanner_domains.txt`` from script runtime directory by default.
 
     Returns
@@ -17,13 +17,12 @@ def read_infile(infile='scanner_domains.txt') -> list:
         Returns a list of domains if successful, ``None`` otherwise.
     """
     try:
-        # Read our input file, store all the lines to stack and return it
         with open(infile, 'r') as f:
             stack = f.readlines()
             f.close()
             return stack
-    except:
-        print('Unable to open input file: ' + infile)
+    except FileNotFoundError:
+        print('Unable to open input file `' + str(infile) + '`... File not found.')
         return [None]
 
 
@@ -33,7 +32,7 @@ def scan(domain: str) -> tuple:
     Parameters
     ----------
     domain : str
-        A list of domains to scan for metadata.
+        A string containing a domain to scan for metadata.
 
     Returns
     -------
@@ -43,6 +42,7 @@ def scan(domain: str) -> tuple:
     try:
         # Make a GET request to the domain
         r = requests.get('http://' + domain + '/')
+        r.raise_for_status()
 
         # Store the elements to a tree to reference later
         root = html.fromstring(r.content)
@@ -63,17 +63,20 @@ def scan(domain: str) -> tuple:
 
         # Return a tuple of the domain, title, description and HTTP status code
         return domain, title, desc, r.status_code
-    except:
-        return domain, None, None, "request failure"
+    except requests.exceptions.RequestException as e:
+        return domain, None, None, e.response
 
 
-def write_outfile(results: tuple) -> bool:
+def write_outfile(results: tuple, outfile='scanner_log.txt') -> bool:
     """Writes results as tuples to the output log file.
 
     Parameters
     ----------
     results : tuple
         A tuple of metadata to be logged.
+    outfile : str
+        A string containing the location of the output log file.
+        Uses ``scanner_log.txt`` from script runtime directory by default.
 
     Returns
     -------
@@ -82,10 +85,9 @@ def write_outfile(results: tuple) -> bool:
     """
     try:
         # Open the output log file and write incoming tuples to it.
-        with open('scanner_log.txt', 'a') as f:
+        with open(outfile, 'a') as f:
             print(str(results), file=f)
             f.close()
             return True
-    except:
-        print('Unable to open output file')
-        return False
+    except FileNotFoundError:
+        print('Unable to open output file `' + str(outfile) + '`... File not found.')
