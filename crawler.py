@@ -49,22 +49,22 @@ def scan(domain: str) -> tuple:
 
         # Store the address of the page title element
         title_path = root.xpath('/html/head/title')
-        if type(title_path) is list:
+        if title_path:
             title = title_path[0].text
         else:
             title = None
 
         # Store the address of the meta description content element
         desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
-        if type(desc_path) is list:
+        if desc_path:
             desc = desc_path[0]
         else:
             desc = None
 
         # Return a tuple of the domain, title, description and HTTP status code
         return domain, title, desc, r.status_code
-    except requests.exceptions.RequestException as e:
-        return domain, None, None, e.response
+    except requests.exceptions.RequestException:
+        return domain, title, desc, None
 
 
 def write_outfile(results: tuple, outfile='scanner_log.txt') -> bool:
@@ -86,7 +86,7 @@ def write_outfile(results: tuple, outfile='scanner_log.txt') -> bool:
     try:
         # Open the output log file and write incoming tuples to it.
         with open(outfile, 'a') as f:
-            print(str(results), file=f)
+            print(str(results).encode("utf-8"), file=f)
             f.close()
             return True
     except FileNotFoundError:

@@ -108,5 +108,4 @@ venv.bak/
 # PyCharm
 .idea
 /Pipfile.lock
-/scanner_domains.txt
-/scanner_log.txt
+/scanner_*.txt
