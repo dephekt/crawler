@@ -23,9 +23,9 @@ If `pipenv` is not installed, it can be installed with `pip`.
 
 #### Dependencies
 
-Python 3.x - [Anaconda for Windows](https://www.anaconda.com/download/#download)
-[lxml](https://pypi.org/project/lxml/)
-[requests](https://pypi.org/project/requests/)
+* Python 3.x - [Anaconda for Windows](https://www.anaconda.com/download/#download)
+* [lxml](https://pypi.org/project/lxml/)
+* [requests](https://pypi.org/project/requests/)
 
 ### Running the Application
 
