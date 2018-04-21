@@ -3,21 +3,29 @@ Takes a text file, `scanner_domains.txt`, of domains separated by newlines as in
 
 Writes results as a tuple to `scanner_log.txt` by default and optionally to `stdout` if `--debug` is provided.
 
-### Setting up the Virtual Environment
+## Obtaining the Application
 
-#### Using Pipenv:
+Clone this repository using `git clone https://github.com/dephekt/crawler.git` or download the latest release from the [releases](https://github.com/dephekt/crawler/releases) tab. Then, change into the application directory and proceed to install Python runtime dependencies.
+
+## Installing Runtime Dependencies
+
+### Using Pipenv:
 
 Change to the application's root directory (where `app.py` is located), then run the following.
 
     python -m pipenv install
 
-#### Installing Pipenv:
+### Installing Pipenv:
 
 If `pipenv` is not installed, it can be installed with `pip`.
 
     python -m pip install pipenv
 
-### Running the Application
+## Running the Application
+
+Basic usage instructions can be found with:
+
+    python app.py --help
 
 Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines.
 Optionally, one can pass `--infile <input file>` or `--outfile <output file>` to specify a custom path and filename.
