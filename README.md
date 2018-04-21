@@ -1,7 +1,7 @@
 # crawler
-Takes a text file of domains separated by newlines, `scanner_domains.txt`, as input, then crawls through the list, gathering the page title and meta-description for each domain.
+Takes a text file, `scanner_domains.txt`, of domains separated by newlines as input, then crawls through the list, gathering the page title and meta-description for each domain.
 
-Writes results as a tuple to stdout and to `scanner_log.txt`.
+Writes results as a tuple to `scanner_log.txt` by default and optionally to `stdout` if `--debug` is provided.
 
 ### Setting up the Virtual Environment
 
@@ -19,8 +19,15 @@ If `pipenv` is not installed, it can be installed with `pip`.
 
 ### Running the Application
 
-Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines. Then run:
+Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines.
+Optionally, one can pass `--infile <input file>` or `--outfile <output file>` to specify a custom path and filename.
+
+Then run:
 
     python app.py --scan
 
-The application should log to `stdout` and to `scanner_log.txt`.
+By default, the application will log scan results to  `scanner_log.txt` if `--outfile` is not passed.
+
+To enable logging to the console pass `--debug` to `app.py`, for example:
+
+    python app.py --scan --debug --infile C:\domains.txt --outfile C:\scan_log.txt
