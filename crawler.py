@@ -39,6 +39,8 @@ def scan(domain: str) -> tuple:
     tuple
         Returns a tuple of results.
     """
+    title = None
+    desc = None
     try:
         # Make a GET request to the domain
         r = requests.get('http://' + domain + '/')
