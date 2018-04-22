@@ -6,6 +6,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--scan', help='perform a scan', action='store_true')
 parser.add_argument('--infile', help='set a custom domain input file location')
 parser.add_argument('--outfile', help='set a custom output log file location')
+parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true')
 parser.add_argument('--debug', help='enable debugging output', action='store_true')
 args = parser.parse_args()
 
@@ -23,6 +24,13 @@ if args.outfile:
 else:
     outfile = False
 
+if args.clobber:
+    clobber = True
+    if args.debug:
+        print('Clobbering log file since `--clobber` was passed at runtime...')
+else:
+    clobber = False
+
 if args.scan:
     if infile:
         stack = crawler.read_infile(args.infile)
@@ -34,9 +42,9 @@ if args.scan:
             domain = stack.pop().strip()
             scan_results = crawler.scan(domain)
             if outfile:
-                log_status = crawler.write_outfile(scan_results, args.outfile)
+                log_status = crawler.write_outfile(scan_results, args.outfile, clobber)
             else:
-                log_status = crawler.write_outfile(scan_results)
+                log_status = crawler.write_outfile(scan_results, clobber=clobber)
             if args.debug:
                 print(str(scan_results))
     except AttributeError:
