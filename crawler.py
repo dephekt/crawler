@@ -67,7 +67,7 @@ def scan(domain: str) -> tuple:
         return domain, title, desc, None
 
 
-def write_outfile(results: tuple, outfile='scanner_log.txt') -> bool:
+def write_outfile(results: tuple, outfile='scanner_log.txt', clobber=False) -> bool:
     """Writes results as tuples to the output log file.
 
     Parameters
@@ -77,15 +77,23 @@ def write_outfile(results: tuple, outfile='scanner_log.txt') -> bool:
     outfile : str
         A string containing the location of the output log file.
         Uses ``scanner_log.txt`` from script runtime directory by default.
+    clobber : bool
+        A boolean to determine if an existing log will be clobbered.
+        ``True`` if the log will be clobbered, ``False`` otherwise.
 
     Returns
     -------
     bool
         Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
+    if clobber:
+        log_file_action = 'w'
+    else:
+        log_file_action = 'a'
+
     try:
         # Open the output log file and write incoming tuples to it.
-        with open(outfile, 'a') as f:
+        with open(outfile, log_file_action) as f:
             print(str(results).encode("utf-8"), file=f)
             f.close()
             return True
