@@ -3,6 +3,36 @@ Takes a text file, `scanner_domains.txt`, of domains separated by newlines as in
 
 Writes results as a tuple to `scanner_log.txt` by default and optionally to `stdout` if `--debug` is provided.
 
+### Running the Application
+Basic usage instructions can be found with:
+
+    $ python app.py --help
+    
+    usage: app.py [-h] [--scan] [--infile INFILE] [--outfile OUTFILE] [--clobber]
+              [--debug]
+
+    optional arguments:
+      -h, --help         show this help message and exit
+      --scan             perform a scan
+      --infile INFILE    set a custom domain input file location
+      --outfile OUTFILE  set a custom output log file location
+      --clobber          wipe and reuse the log instead of appending to it
+      --debug            enable debugging output
+
+
+Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines.
+Optionally, one can pass `--infile <input file>` or `--outfile <output file>` to specify a custom path and filename.
+
+Then run:
+
+    python app.py --scan
+
+By default, the application will log scan results to  `scanner_log.txt` if `--outfile` is not passed.
+
+To enable logging to the console pass `--debug` to `app.py`, for example:
+
+    python app.py --scan --debug --infile C:\domains.txt --outfile C:\scan_log.txt
+
 ### Obtaining the Application
 
 ##### Using Git
@@ -67,37 +97,6 @@ This list may or may not be current. Always check `Pipfile` in the application r
 
 ##### Expecting Python 2.x Support?
 There will never be Python 2.x support for this; Python 2.7 support sunsets on January 1, 2020. See [this statement](http://python3statement.org/) regarding the move to Python 3.
-
-### Running the Application
-
-Basic usage instructions can be found with:
-
-    $ python app.py --help
-    
-    usage: app.py [-h] [--scan] [--infile INFILE] [--outfile OUTFILE] [--clobber]
-              [--debug]
-
-    optional arguments:
-      -h, --help         show this help message and exit
-      --scan             perform a scan
-      --infile INFILE    set a custom domain input file location
-      --outfile OUTFILE  set a custom output log file location
-      --clobber          wipe and reuse the log instead of appending to it
-      --debug            enable debugging output
-
-
-Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines.
-Optionally, one can pass `--infile <input file>` or `--outfile <output file>` to specify a custom path and filename.
-
-Then run:
-
-    python app.py --scan
-
-By default, the application will log scan results to  `scanner_log.txt` if `--outfile` is not passed.
-
-To enable logging to the console pass `--debug` to `app.py`, for example:
-
-    python app.py --scan --debug --infile C:\domains.txt --outfile C:\scan_log.txt
 
 ### Bugs and Issues
 Please report any problems or feature requests using the [issues tab](https://github.com/dephekt/crawler/issues) on the GitHub project. Please include the domain which triggered the problem as well as the full Python traceback if an exception was encountered.
