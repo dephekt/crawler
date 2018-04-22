@@ -34,7 +34,7 @@ Alternatively, pipenv may be installed on MacOS with Homebrew using:
 
     brew install pipenv
 
-###### Ubuntu 17.10:
+##### Ubuntu 17.10:
 Ubuntu 17.10 users can install it with `apt` using the APT PPA repository:
 
     sudo apt-get install software-properties-common python-software-properties
