@@ -56,6 +56,8 @@ def scan(domain: str, timeout=30) -> tuple:
         return domain, title, desc, 'Timeout'
     except requests.TooManyRedirects:
         return domain, title, desc, 'RedirectLoop'
+    except requests.exceptions.ContentDecodingError:
+        return domain, title, desc, 'ContentDecodingError'
 
     try:
         root = html.fromstring(r.content)
