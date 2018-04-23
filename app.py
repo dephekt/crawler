@@ -4,10 +4,11 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--scan', help='perform a scan', action='store_true')
-parser.add_argument('--infile', help='set a custom domain input file location')
-parser.add_argument('--outfile', help='set a custom output log file location')
+parser.add_argument('--infile', help='set a custom domain input file location [default: scanner_domains.txt]')
+parser.add_argument('--outfile', help='set a custom output log file location [default: scanner_log.txt]')
 parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true')
 parser.add_argument('--debug', help='enable debugging output', action='store_true')
+parser.add_argument('--timeout', help='number of seconds to wait for a scan response before timing out [default: 30]')
 args = parser.parse_args()
 
 if args.infile:
@@ -31,6 +32,11 @@ if args.clobber:
 else:
     clobber = False
 
+if args.timeout:
+    timeout = int(args.timeout)
+else:
+    timeout = 30
+
 if args.scan:
     if infile:
         stack = crawler.read_infile(args.infile)
@@ -40,7 +46,7 @@ if args.scan:
     try:
         while stack:
             domain = stack.pop().strip()
-            scan_results = crawler.scan(domain)
+            scan_results = crawler.scan(domain, timeout=timeout)
             if outfile:
                 log_status = crawler.write_outfile(scan_results, args.outfile, clobber)
             else:

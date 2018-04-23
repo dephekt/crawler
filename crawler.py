@@ -26,13 +26,15 @@ def read_infile(infile='scanner_domains.txt') -> list:
         return [None]
 
 
-def scan(domain: str) -> tuple:
+def scan(domain: str, timeout=30) -> tuple:
     """Scans a list of domains for relevant metadata.
 
     Parameters
     ----------
     domain : str
         A string containing a domain to scan for metadata.
+    timeout : int
+        An integer indicating the number of seconds to wait for a response before timing out.
 
     Returns
     -------
@@ -41,36 +43,45 @@ def scan(domain: str) -> tuple:
     """
     title = None
     desc = None
+
     try:
         # Make a GET request to the domain
-        r = requests.get('http://' + domain + '/')
+        r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
-
-        # Store the elements to a tree to reference later
-        root = html.fromstring(r.content)
-
-        # Store the address of the page title element
-        title_path = root.xpath('/html/head/title')
-        if title_path:
-            title = title_path[0].text
-        else:
-            title = None
-
-        # Store the address of the meta description content element
-        desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
-        if desc_path:
-            desc = desc_path[0]
-        else:
-            desc = None
-
-        # Return a tuple of the domain, title, description and HTTP status code
-        return domain, title, desc, r.status_code
-
-    except requests.exceptions.RequestException:
+    except requests.ConnectionError:
         return domain, title, desc, None
+    except requests.HTTPError:
+        return domain, title, desc, None
+    except requests.Timeout:
+        return domain, title, desc, 'Timeout'
 
+    try:
+        root = html.fromstring(r.content)
     except html.etree.ParserError:
         return domain, title, desc, 'Empty'
+
+    # Store the address of the page title element
+    title_path = root.xpath('/html/head/title')
+    if title_path:
+        try:
+            title = title_path[0].text
+        except UnicodeDecodeError:
+            title = 'UnicodeDecodeError'
+    else:
+        title = None
+
+    # Store the address of the meta description content element
+    desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
+    if desc_path:
+        try:
+            desc = desc_path[0]
+        except UnicodeDecodeError:
+            desc = 'UnicodeDecodeError'
+    else:
+        desc = None
+
+    # Return a tuple of the domain, title, description and HTTP status code
+    return domain, title, desc, r.status_code
 
 
 def write_outfile(results: tuple, outfile='scanner_log.txt', clobber=False) -> bool:
