@@ -1,5 +1,6 @@
 from lxml import html
 import requests
+import urllib3
 
 
 def read_infile(infile='scanner_domains.txt') -> list:
@@ -58,6 +59,10 @@ def scan(domain: str, timeout=30) -> tuple:
         return domain, title, desc, 'RedirectLoop'
     except requests.exceptions.ContentDecodingError:
         return domain, title, desc, 'ContentDecodingError'
+    except UnicodeError:
+        return domain, title, desc, 'UnicodeError'
+    except urllib3.exceptions.LocationValueError:
+        return domain, title, desc, None
 
     try:
         root = html.fromstring(r.content)
