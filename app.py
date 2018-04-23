@@ -52,7 +52,10 @@ if args.scan:
             else:
                 log_status = crawler.write_outfile(scan_results, clobber=clobber)
             if args.debug:
-                print(str(scan_results))
+                try:
+                    print(str(scan_results))
+                except UnicodeEncodeError:
+                    pass
     except AttributeError:
         if args.debug:
             print('Unable to pop a domain off the stack... Does file: `' + str(args.infile) + '` contain domains?')
