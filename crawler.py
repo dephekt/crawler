@@ -46,30 +46,31 @@ def scan(domain: str) -> tuple:
         r = requests.get('http://' + domain + '/')
         r.raise_for_status()
 
-        if r.content:
-            # Store the elements to a tree to reference later
-            root = html.fromstring(r.content)
+        # Store the elements to a tree to reference later
+        root = html.fromstring(r.content)
 
-            # Store the address of the page title element
-            title_path = root.xpath('/html/head/title')
-            if title_path:
-                title = title_path[0].text
-            else:
-                title = None
-
-            # Store the address of the meta description content element
-            desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
-            if desc_path:
-                desc = desc_path[0]
-            else:
-                desc = None
-
-            # Return a tuple of the domain, title, description and HTTP status code
-            return domain, title, desc, r.status_code
+        # Store the address of the page title element
+        title_path = root.xpath('/html/head/title')
+        if title_path:
+            title = title_path[0].text
         else:
-            return domain, title, desc, 'Empty'
+            title = None
+
+        # Store the address of the meta description content element
+        desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
+        if desc_path:
+            desc = desc_path[0]
+        else:
+            desc = None
+
+        # Return a tuple of the domain, title, description and HTTP status code
+        return domain, title, desc, r.status_code
+
     except requests.exceptions.RequestException:
         return domain, title, desc, None
+
+    except html.etree.ParserError:
+        return domain, title, desc, 'Empty'
 
 
 def write_outfile(results: tuple, outfile='scanner_log.txt', clobber=False) -> bool:
