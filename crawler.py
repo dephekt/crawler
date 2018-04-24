@@ -63,6 +63,8 @@ def scan(domain: str, timeout=30) -> tuple:
         return domain, title, desc, 'UnicodeError'
     except urllib3.exceptions.LocationValueError:
         return domain, title, desc, None
+    except requests.exceptions.InvalidSchema:
+        return domain, title, desc, 'InvalidURLSchema'
 
     try:
         root = html.fromstring(r.content)

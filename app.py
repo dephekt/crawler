@@ -43,20 +43,20 @@ if args.scan:
     else:
         stack = crawler.read_infile()
 
-    # try:
-    while stack:
-        domain = stack.pop().strip()
-        scan_results = crawler.scan(domain, timeout=timeout)
-        if outfile:
-            log_status = crawler.write_outfile(scan_results, args.outfile, clobber)
-        else:
-            log_status = crawler.write_outfile(scan_results, clobber=clobber)
-        if args.debug:
-            try:
-                print(str(scan_results))
-            except UnicodeEncodeError:
-                pass
+    try:
+        while stack:
+            domain = stack.pop().strip()
+            scan_results = crawler.scan(domain, timeout=timeout)
+            if outfile:
+                log_status = crawler.write_outfile(scan_results, args.outfile, clobber)
+            else:
+                log_status = crawler.write_outfile(scan_results, clobber=clobber)
+            if args.debug:
+                try:
+                    print(str(scan_results))
+                except UnicodeEncodeError:
+                    pass
 
-    # except AttributeError:
-    #     if args.debug:
-    #         print('Unable to pop a domain off the stack... Does file: `' + str(args.infile) + '` contain domains?')
+    except AttributeError:
+        if args.debug:
+            print('Unable to pop a domain off the stack... Does file: `' + str(args.infile) + '` contain domains?')
