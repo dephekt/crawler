@@ -49,6 +49,10 @@ def scan(domain: str, timeout=30) -> tuple:
         # Make a GET request to the domain
         r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
+    except UnicodeError:
+        return domain, title, desc, 'UnicodeError'
+    except urllib3.exceptions.LocationValueError:
+        return domain, title, desc, None
     except requests.ConnectionError:
         return domain, title, desc, None
     except requests.HTTPError:
@@ -59,39 +63,32 @@ def scan(domain: str, timeout=30) -> tuple:
         return domain, title, desc, 'RedirectLoop'
     except requests.exceptions.ContentDecodingError:
         return domain, title, desc, 'ContentDecodingError'
-    except UnicodeError:
-        return domain, title, desc, 'UnicodeError'
-    except urllib3.exceptions.LocationValueError:
-        return domain, title, desc, None
+    except requests.exceptions.ChunkedEncodingError:
+        return domain, title, desc, 'ChunkedEncodingError'
     except requests.exceptions.InvalidSchema:
-        return domain, title, desc, 'InvalidURLSchema'
+        return domain, title, desc, 'InvalidSchema'
+    except requests.exceptions.InvalidURL:
+        return domain, title, desc, 'InvalidURL'
+    except requests.exceptions.InvalidHeader:
+        return domain, title, desc, 'InvalidHeader'
+    except requests.exceptions.FileModeWarning:
+        return domain, title, desc, 'FileModeWarning'
 
     try:
         root = html.fromstring(r.content)
     except html.etree.ParserError:
         return domain, title, desc, 'Empty'
 
-    # Store the address of the page title element
-    title_path = root.xpath('/html/head/title')
-    if title_path:
-        try:
-            title = title_path[0].text
-        except UnicodeDecodeError:
-            title = 'UnicodeDecodeError'
-    else:
-        title = None
+    try:
+        title = root.xpath('/html/head/title')[0].text
+    except UnicodeDecodeError:
+        title = 'UnicodeDecodeError'
 
-    # Store the address of the meta description content element
-    desc_path = root.xpath('/html/head/meta[@name="description"]/@content')
-    if desc_path:
-        try:
-            desc = desc_path[0]
-        except UnicodeDecodeError:
-            desc = 'UnicodeDecodeError'
-    else:
-        desc = None
+    try:
+        desc = root.xpath('/html/head/meta[@name="description"]/@content')[0]
+    except UnicodeDecodeError:
+        desc = 'UnicodeDecodeError'
 
-    # Return a tuple of the domain, title, description and HTTP status code
     return domain, title, desc, r.status_code
 
 
@@ -123,7 +120,8 @@ def write_outfile(results: tuple, outfile='scanner_log.txt', clobber=False) -> b
         # Open the output log file and write incoming tuples to it.
         with open(outfile, log_file_action) as f:
             print(str(results).encode("utf-8"), file=f)
-            f.close()
-            return True
     except FileNotFoundError:
         print('Unable to open output file `' + str(outfile) + '`... File not found.')
+    else:
+        f.close()
+        return True
