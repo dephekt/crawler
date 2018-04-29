@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--scan', help='perform a scan', action='store_true')
 parser.add_argument('--threaded', help='distribute scanning tasks over multiple threads', action='store_true')
 parser.add_argument('--chunks', help='indicates the number of domains each chunk should contain', type=int)
+parser.add_argument('--workers', help='indicates the number of workers to give the processing pool', type=int)
 parser.add_argument('--infile', help='set a custom domain input file location [default: scanner_domains.txt]')
 parser.add_argument('--outfile', help='set a custom output log file location [default: scanner_log.txt]')
 parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true')
@@ -68,16 +69,31 @@ if args.scan is True and args.threaded is False:
             print('Unable to pop a domain off the stack... Does file: `' + str(args.infile) + '` contain domains?')
 
 if args.threaded is True and args.scan is True:
-    pool = Pool(cpu_count())
+    if args.workers is not None:
+        pool = Pool(args.workers)
+        if args.debug:
+            print('Created a worker pool with ' + str(args.workers) + ' workers...')
+    else:
+        pool = Pool(cpu_count())
+        if args.debug:
+            print('Created a worker pool with ' + cpu_count().__str__() + ' workers...')
+
     if infile and args.chunks:
         domain_chunks = crawler.read_infile_threaded(args.infile, args.chunks)
+        if args.debug:
+            print('Mapping ' + str(args.chunks) + ' domains per chunk to the worker pool...')
     elif infile:
         domain_chunks = crawler.read_infile_threaded(args.infile)
     else:
         domain_chunks = crawler.read_infile_threaded()
 
+    print('This workload contains ' + domain_chunks.__len__().__str__() + ' chunks to be processed...')
+    chunk_counter = 0
     for domains in domain_chunks:
+        chunk_counter += 1
+        print('Sent ' + str(chunk_counter * domains.__len__()) + ' domains to processing so far...')
         results = pool.map(crawler.scan, domains)
+        print('Processed domains: ' + str(domains))
         for result in results:
             if outfile:
                 crawler.write_outfile(result, args.outfile, clobber)
