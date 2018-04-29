@@ -1,5 +1,6 @@
 from lxml import html
 import requests
+from urllib3 import exceptions
 
 
 def chunk_list(list_: list, size: int) -> list:
@@ -90,9 +91,10 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     try:
         r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
-    except UnicodeError as e:
-        print(str(e))
+    except UnicodeError:
         return domain, None, None, 'UnicodeError'
+    except exceptions.LocationValueError:
+        return domain, None, None, None
     except requests.ConnectionError:
         return domain, title, desc, None
     except requests.HTTPError:
