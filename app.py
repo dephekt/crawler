@@ -39,7 +39,7 @@ else:
 if args.timeout:
     timeout = int(args.timeout)
 else:
-    timeout = 30
+    timeout = 10
 
 if args.scan is True and args.threaded is False:
     domain = None
