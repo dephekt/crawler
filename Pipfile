@@ -9,6 +9,7 @@ requests = "*"
 
 [dev-packages]
 "flake8" = "*"
+pipenv = "*"
 
 [requires]
 python_version = "3"
