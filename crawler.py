@@ -1,17 +1,21 @@
 from lxml import html
 import requests
-import urllib3
+
+
+def chunk_list(list_, size):
+    return [
+        list_[index:index + size]
+        for index in range(0, len(list_), size)
+    ]
 
 
 def read_infile(infile='scanner_domains.txt') -> list:
     """Loads an input file containing a list of domains to scan.
-
     Parameters
     ----------
     infile : str
         A string containing the location of the output log file.
         Uses ``scanner_domains.txt`` from script runtime directory by default.
-
     Returns
     -------
     list
@@ -25,6 +29,32 @@ def read_infile(infile='scanner_domains.txt') -> list:
     except FileNotFoundError:
         print('Unable to open input file `' + str(infile) + '`... File not found.')
         return [None]
+
+
+def read_infile_threaded(infile='scanner_domains.txt', chunk_size=25) -> list:
+    """Loads an input file containing a list of domains to scan.
+
+    Parameters
+    ----------
+    infile : str
+        A string containing the location of the output log file.
+        Uses ``scanner_domains.txt`` from script runtime directory by default.
+    chunk_size : int
+
+    Returns
+    -------
+    list
+        Returns a list of domain chunks if successful, ``None`` otherwise.
+    """
+    try:
+        with open(infile, 'r') as f:
+            domain_chunks = chunk_list(f.readlines(), chunk_size)
+    except FileNotFoundError:
+        print('Unable to open input file `' + str(infile) + '`... File not found.')
+        return [None]
+    else:
+        f.close()
+        return domain_chunks
 
 
 def scan(domain: str, timeout=30) -> tuple:
@@ -42,6 +72,7 @@ def scan(domain: str, timeout=30) -> tuple:
     tuple
         Returns a tuple of results.
     """
+    domain = str(domain).strip()
     title = None
     desc = None
 
@@ -49,10 +80,6 @@ def scan(domain: str, timeout=30) -> tuple:
         # Make a GET request to the domain
         r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
-    except UnicodeError:
-        return domain, title, desc, 'UnicodeError'
-    except urllib3.exceptions.LocationValueError:
-        return domain, title, desc, None
     except requests.ConnectionError:
         return domain, title, desc, None
     except requests.HTTPError:
@@ -81,13 +108,13 @@ def scan(domain: str, timeout=30) -> tuple:
 
     try:
         title = root.xpath('/html/head/title')[0].text
-    except UnicodeDecodeError:
-        title = 'UnicodeDecodeError'
+    except Exception:
+        title = None
 
     try:
         desc = root.xpath('/html/head/meta[@name="description"]/@content')[0]
-    except UnicodeDecodeError:
-        desc = 'UnicodeDecodeError'
+    except Exception:
+        desc = None
 
     return domain, title, desc, r.status_code
 
