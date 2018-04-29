@@ -92,12 +92,5 @@ if args.threaded is True and args.scan is True:
     for domains in domain_chunks:
         chunk_counter += 1
         print('Sent ' + str(chunk_counter * domains.__len__()) + ' domains to processing so far...')
-        results = pool.map(crawler.scan, domains)
-        print('Processed domains: ' + str(domains))
-        for result in results:
-            if outfile:
-                crawler.write_outfile(result, args.outfile, clobber)
-            else:
-                crawler.write_outfile(result, clobber=clobber)
-            if args.debug:
-                print(str(result))
+        results = pool.map_async(crawler.scan, domains, callback=crawler.write_outfile_async)
+        print('Completed processing of: ' + str(results.get()))

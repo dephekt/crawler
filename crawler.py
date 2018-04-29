@@ -90,6 +90,9 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     try:
         r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
+    except UnicodeError as e:
+        print(str(e))
+        return domain, None, None, 'UnicodeError'
     except requests.ConnectionError:
         return domain, title, desc, None
     except requests.HTTPError:
@@ -156,3 +159,16 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
     else:
         f.close()
         return True
+
+
+def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
+    if iterable.__len__() is not 0 or iterable.__len__() is not False:
+        for results in iterable:
+            try:
+                with open(outfile, 'a') as f:
+                    print(str(results).encode("utf-8"), file=f)
+            except FileNotFoundError:
+                print('Unable to open output file `' + str(outfile) + '`... File not found.')
+            else:
+                f.close()
+                return True
