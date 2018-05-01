@@ -84,10 +84,16 @@ if args.threaded is True and args.scan is True:
             print('Mapping ' + str(args.chunks) + ' domains per chunk to the worker pool...')
     elif infile:
         domain_chunks = crawler.read_infile_threaded(args.infile)
+        if domain_chunks is None:
+            exit(1)
     else:
         domain_chunks = crawler.read_infile_threaded()
 
-    print('This workload contains ' + domain_chunks.__len__().__str__() + ' chunks to be processed...')
+    if domain_chunks[0] is None:
+        exit(1)
+    else:
+        print('This workload contains ' + domain_chunks.__len__().__str__() + ' chunks to be processed...')
+
     chunk_counter = 0
     for domains in domain_chunks:
         chunk_counter += 1
