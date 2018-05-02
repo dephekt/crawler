@@ -19,10 +19,10 @@ cache:
     - venv/
 
 before_script:
-  - python -V               # Print out python version for debugging
-  - pip install pipenv
-  - pipenv install
-  - pipenv shell
+  - python3.5 -V               # Print out python version for debugging
+  - pip3 install pipenv
+  - python3.5 -m pipenv install
+  - python3.5 -m pipenv shell
 
 test:
   script:
@@ -30,4 +30,4 @@ test:
 
 run:
   script:
-  - python app.py --help
+  - python3.5 -m app --help
