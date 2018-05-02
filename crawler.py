@@ -1,6 +1,5 @@
 import requests
 import warnings
-import logging
 from lxml import html
 from urllib3 import exceptions
 
