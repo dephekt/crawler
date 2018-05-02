@@ -45,7 +45,7 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
         warnings.warn(
             'Unable to open input file `%s`... File not found.' %
             infile
-         )
+        )
         return [None]
 
 
