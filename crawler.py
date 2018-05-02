@@ -140,6 +140,8 @@ def scan(domain: str, timeout: int = 10) -> tuple:
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
     """Writes tuples of results as tuples to the output log file.
 
+    This is for processing synchronous results from a non-threaded scan.
+
     :param results: Metadata about the scan to be logged.
     :type results: tuple
 
@@ -152,9 +154,9 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
     :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
     if clobber:
-        log_file_action = 'w'
+        log_file_action = 'wt'
     else:
-        log_file_action = 'a'
+        log_file_action = 'at'
 
     try:
         with open(outfile, log_file_action) as f:
@@ -167,6 +169,21 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
 
 
 def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
+    """Iterates on a list of tuples of results and writes each result as a tuple to the output log file.
+
+    This is for processing results of an asynchronous/threaded scan.
+
+    :param iterable: A list containing metadata about the scanned chunk to be logged.
+    :type iterable: tuple
+
+    :param outfile: A string containing the location of the output log file. Uses ``scanner_log.txt`` by default.
+    :type outfile: str
+
+    :param clobber: A boolean to determine if an existing log should be clobbered or not.
+    :type clobber: bool
+
+    :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
+    """
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
             try:

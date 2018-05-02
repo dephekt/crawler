@@ -99,7 +99,11 @@ if args.threaded is True and args.scan is True:
         chunk_counter += 1
         print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
         map_results = pool.map(crawler.scan, domains)
-        log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
+        if args.outfile:
+            log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
+        else:
+            log_result = crawler.write_outfile_async(map_results)
+
         if log_result:
             logging.info('Successfully wrote a batch of results to the output log ...')
         else:
