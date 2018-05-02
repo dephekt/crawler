@@ -23,8 +23,8 @@ parser.add_argument(
     type=int,
 )
 parser.add_argument(
-    '--infile',
-    help='set a custom domain input file location [default: scanner_domains.txt]',
+    '--infile', help='set a custom domain input file location '
+                     '[default: scanner_domains.txt]',
 )
 parser.add_argument(
     '--outfile',
