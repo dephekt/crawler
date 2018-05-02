@@ -27,7 +27,7 @@ before_script:
 test:
   script:
   - source $VENV_HOME_DIR/bin/activate
-  - flake8
+  - python3.5 -m flake8
 
 run:
   script:
