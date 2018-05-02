@@ -168,7 +168,7 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
         return True
 
 
-def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
+def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> bool:
     """Iterates on a list of tuples of results and writes each result as a tuple to the output log file.
 
     This is for processing results of an asynchronous/threaded scan.
@@ -178,9 +178,6 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobbe
 
     :param outfile: A string containing the location of the output log file. Uses ``scanner_log.txt`` by default.
     :type outfile: str
-
-    :param clobber: A boolean to determine if an existing log should be clobbered or not.
-    :type clobber: bool
 
     :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
