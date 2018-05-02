@@ -1,5 +1,6 @@
-from lxml import html
 import requests
+import warnings
+from lxml import html
 from urllib3 import exceptions
 
 
@@ -38,7 +39,7 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
             f.close()
             return stack
     except FileNotFoundError:
-        print('Unable to open input file `' + str(infile) + '`... File not found.')
+        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
         return [None]
 
 
@@ -63,7 +64,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         with open(infile, 'r') as f:
             domain_chunks = chunk_list(f.readlines(), chunk_size)
     except FileNotFoundError:
-        print('Unable to open input file `' + str(infile) + '`... File not found.')
+        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
         return [None]
     else:
         f.close()
@@ -95,6 +96,8 @@ def scan(domain: str, timeout: int = 10) -> tuple:
         return domain, None, None, 'UnicodeError'
     except exceptions.LocationValueError:
         return domain, None, None, None
+    except exceptions.HeaderParsingError:
+        warnings.warn('Error parsing headers for %s ...' % r.url)
     except requests.ConnectionError:
         return domain, title, desc, None
     except requests.HTTPError:
@@ -157,7 +160,7 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
         with open(outfile, log_file_action) as f:
             print(str(results).encode("utf-8"), file=f)
     except FileNotFoundError:
-        print('Unable to open output file `' + str(outfile) + '`... File not found.')
+        warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
     else:
         f.close()
         return True
@@ -167,10 +170,11 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobbe
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
             try:
-                with open(outfile, 'a') as f:
+                with open(outfile, 'at') as f:
                     print(str(results).encode("utf-8"), file=f)
             except FileNotFoundError:
-                print('Unable to open output file `' + str(outfile) + '`... File not found.')
-            else:
-                f.close()
-                return True
+                warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
+                return False
+        if f:
+            f.close()
+        return True
