@@ -20,8 +20,8 @@ cache:
 
 before_script:
   - python3.5 -V               # Print out python version for debugging
-  - pip3 install pipenv
-  - python3.5 -m pipenv install
+  - pip3 install --user pipenv
+  - pipenv install
   - export VENV_HOME_DIR=$(pipenv --venv)
 
 test:
