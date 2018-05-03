@@ -10,7 +10,7 @@ requests = "*"
 [dev-packages]
 "flake8" = "*"
 pipenv = "*"
-prospector = ""
+prospector = "*"
 
 [requires]
 python_version = "3"
