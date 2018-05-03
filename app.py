@@ -23,8 +23,8 @@ parser.add_argument(
     type=int,
 )
 parser.add_argument(
-    '--infile', help='set a custom domain input file location '
-                     '[default: scanner_domains.txt]',
+    '--infile',
+    help='set a custom domain input file location [default: scanner_domains.txt]',
 )
 parser.add_argument(
     '--outfile',
@@ -60,7 +60,7 @@ elif args.verbose:
     logging.info('Informative logging to console is enabled ...')
 
 if args.infile:
-    logging.info('Using user provided domain input file %s ...' % args.infile)
+    logging.info('Using user provided domain input file %s ...', args.infile)
 else:
     logging.info(
         'Using default domain input file as `--infile` was not provided at '
@@ -68,7 +68,7 @@ else:
     )
 
 if args.outfile:
-    logging.info('Using user provided output log file %s ...' % args.outfile)
+    logging.info('Using user provided output log file %s ...', args.outfile)
 else:
     logging.info(
         'Using default scan output file as `--outfile` was not provided at '
@@ -87,12 +87,10 @@ else:
 
 if args.timeout:
     timeout = args.timeout
-    logging.info(
-        'Using user-provided network timeout of %i ...' % args.timeout
-    )
+    logging.info('Using user-provided network timeout of %i ...', args.timeout)
 else:
     timeout = 10
-    logging.info('Using default network timeout of %i' % timeout)
+    logging.info('Using default network timeout of %i', timeout)
 
 if args.scan is True and args.threaded is False:
     domain = None

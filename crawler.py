@@ -5,8 +5,7 @@ from urllib3 import exceptions
 
 
 def chunk_list(list_: list, size: int) -> list:
-    """Take a list `list_` and break it down into a list of lists containing
-    `size` elements per list.
+    """Take a list `list_` and break it down into a list of lists containing `size` elements per list.
 
     :param list_: A list of elements to be chunked.
     :type list_: list
@@ -25,16 +24,14 @@ def chunk_list(list_: list, size: int) -> list:
 def read_infile(infile: str = 'scanner_domains.txt') -> list:
     """Loads an input file containing a list of domains to scan.
 
-    This loader should be called when the intention is to perform a scan
-    against one domain at a time, synchronously. For running parallel scans,
-    call the `read_infile_threaded` function instead.
+    This loader should be called when the intention is to perform a scan against one domain at a time, synchronously.
+    For running parallel scans, call the `read_infile_threaded` function instead.
 
-    :param infile: A string containing the location of the output log file.
-        Uses ``scanner_domains.txt`` from script runtime directory by default.
+    :param infile: A string containing the location of the output log file. Uses ``scanner_domains.txt`` from script
+        runtime directory by default.
     :type infile: str
 
-    :return: Returns a list of domains if successful, returns a list
-        containing ``None`` otherwise.
+    :return: Returns a list of domains if successful, returns a list containing ``None`` otherwise.
     """
     try:
         with open(infile, 'r') as f:
@@ -42,60 +39,49 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
             f.close()
             return stack
     except FileNotFoundError:
-        warnings.warn(
-            'Unable to open input file `%s`... File not found.' %
-            infile
-        )
+        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
         return [None]
 
 
-def read_infile_threaded(infile: str = 'domains.txt', chunk_size: int = 25) -> list:
+def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 25) -> list:
     """Loads an input file containing a list of domains to scan and chunks it.
 
-    This loader should be called when making threaded requests. It takes a
-    list of domains, divides them up into equal-numbered chunks of `chunk_size`
-    domains and returns a `chunk_list` of lists of domains, where the index of
-    `chunk_list` references a list of domains and the index of the domain list
-    references a domain to scan.
+    This loader should be called when making threaded requests. It takes a list of domains, divides them up into
+    equal-numbered chunks of `chunk_size` domains and returns a `chunk_list` of lists of domains, where the index
+    of `chunk_list` references a list of domains and the index of the domain list references a domain to scan.
 
-    :param infile: A string containing the location of the output log file.
-        Uses ``scanner_domains.txt`` by default.
+    :param infile: A string containing the location of the output log file. Uses ``scanner_domains.txt`` by default.
     :type infile: str
 
-    :param chunk_size: An integer indicating the number of domains to include
-        in each map operation sent to the pool of workers. Larger chunks do
-        not necessarily equate to faster processing. Default is 25 domains per
-        chunk.
+    :param chunk_size: An integer indicating the number of domains to include in each map operation sent to the pool
+        of workers. Larger chunks do not necessarily equate to faster processing. Default is 25 domains per chunk.
     :type chunk_size: int
 
-    :return: Returns a list of domain chunks referencing lists of domains if
-        successful, returns a list containing ``None`` otherwise.
+    :return: Returns a list of domain chunks referencing lists of domains if successful, returns a list containing
+        ``None`` otherwise.
     """
     try:
         with open(infile, 'r') as f:
             domain_chunks = chunk_list(f.readlines(), chunk_size)
     except FileNotFoundError:
-        warnings.warn(
-            'Unable to open input file `%s`... File not found.' % infile
-        )
+        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
         return [None]
     else:
         f.close()
         return domain_chunks
 
 
+# pylint: disable=too-many-branches
 def scan(domain: str, timeout: int = 10) -> tuple:
     """Scans a list of domains for relevant metadata.
 
-    Currently gets the homepage of a domain and returns domain, page title,
-    site meta description and HTTP status code of the request, if any, as a
-    tuple of values.
+    Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
+    code of the request, if any, as a tuple of values.
 
     :param domain: A string containing a domain to scan for metadata.
     :type domain: str
 
-    :param timeout: An integer indicating the number of seconds to wait for a
-        response before timing out.
+    :param timeout: An integer indicating the number of seconds to wait for a response before timing out.
     :type timeout: int
 
     :return: Returns a tuple of results.
@@ -152,7 +138,7 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     return domain, title, desc, r.status_code
 
 
-def write_outfile(results: tuple, outfile: str = 'scan_log.txt', clobber: bool = False) -> bool:
+def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
     """Writes tuples of results as tuples to the output log file.
 
     This is for processing synchronous results from a non-threaded scan.
@@ -160,16 +146,13 @@ def write_outfile(results: tuple, outfile: str = 'scan_log.txt', clobber: bool =
     :param results: Metadata about the scan to be logged.
     :type results: tuple
 
-    :param outfile: A string containing the location of the output log file.
-        Uses ``scanner_log.txt`` by default.
+    :param outfile: A string containing the location of the output log file. Uses ``scanner_log.txt`` by default.
     :type outfile: str
 
-    :param clobber: A boolean to determine if an existing log should be
-        clobbered or not.
+    :param clobber: A boolean to determine if an existing log should be clobbered or not.
     :type clobber: bool
 
-    :return: Returns ``True`` if the operation was successful, ``False``
-        otherwise.
+    :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
     if clobber:
         log_file_action = 'wt'
@@ -186,21 +169,16 @@ def write_outfile(results: tuple, outfile: str = 'scan_log.txt', clobber: bool =
         return True
 
 
-def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
-    """Iterates on a list of tuples of results and writes each result as a
-    tuple to the output log file.
+def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> bool:
+    """Iterates on a list of tuples of results and writes each result as a tuple to the output log file.
 
     This is for processing results of an asynchronous/threaded scan.
 
     :param iterable: A list containing metadata about the scanned chunk to be logged.
     :type iterable: tuple
 
-    :param outfile: A string containing the location of the output log file.
-        Uses ``scanner_log.txt`` by default.
+    :param outfile: A string containing the location of the output log file. Uses ``scanner_log.txt`` by default.
     :type outfile: str
-
-    :param clobber: A boolean to determine if an existing log should be clobbered or not.
-    :type clobber: bool
 
     :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
@@ -209,6 +187,7 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt', clobbe
             try:
                 with open(outfile, 'at') as f:
                     print(str(results).encode("utf-8"), file=f)
+                    return True
             except FileNotFoundError:
                 warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
                 return False
