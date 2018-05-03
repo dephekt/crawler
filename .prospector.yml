@@ -1,0 +1,6 @@
+output-format: grouped
+max-line-length: 120
+
+mccabe:
+  disable:
+    - MC0001

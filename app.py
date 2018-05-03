@@ -87,13 +87,7 @@ else:
 
 if args.timeout:
     timeout = args.timeout
-<<<<<<< HEAD
     logging.info('Using user-provided network timeout of %i ...', args.timeout)
-=======
-    logging.info(
-        'Using user-provided network timeout of %i ...' % args.timeout
-    )
->>>>>>> 29736e1... Fix PEP 8 `E501 line too long` issues in `app.py`.
 else:
     timeout = 10
     logging.info('Using default network timeout of %i', timeout)

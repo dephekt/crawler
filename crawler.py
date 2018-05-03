@@ -71,6 +71,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         return domain_chunks
 
 
+# pylint: disable=too-many-branches
 def scan(domain: str, timeout: int = 10) -> tuple:
     """Scans a list of domains for relevant metadata.
 
@@ -186,6 +187,7 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
             try:
                 with open(outfile, 'at') as f:
                     print(str(results).encode("utf-8"), file=f)
+                    return True
             except FileNotFoundError:
                 warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
                 return False
