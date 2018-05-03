@@ -1,7 +1,9 @@
 # crawler
-Takes a text file, `scanner_domains.txt`, of domains separated by newlines as input, then crawls through the list, gathering the page title and meta-description for each domain.
+Takes a text file of domains as input, then iterates through the list, gathering the page title, meta-description and HTTP status of each domain.
 
-Writes results as a tuple to `scanner_log.txt` by default and optionally to `stdout` if `--debug` is provided.
+It can also handle very large data sets by running many scan processes concurrently, with facilities for user-defined process workers `--workers` and domains-per-chunk `--chunks`.
+
+Writes results to `scanner_log.txt` by default and (in the future) optionally to CSV.
 
 ### Running the Application
 Basic usage instructions can be found with:
@@ -14,13 +16,19 @@ Basic usage instructions can be found with:
     optional arguments:
       -h, --help         show this help message and exit
       --scan             perform a scan
+      --threaded         distribute scanning tasks over multiple threads
+      --chunks CHUNKS    indicates the number of domains each chunk should contain
+      --workers WORKERS  indicates the number of workers to give the processing pool
       --infile INFILE    set a custom domain input file location
       --outfile OUTFILE  set a custom output log file location
       --clobber          wipe and reuse the log instead of appending to it
-      --debug            enable debugging output
+      --debug            enable debugging output to the console
+      --verbose          enable informational output to the console
+      --timeout TIMEOUT  number of seconds to wait for a scan response before timing out
 
 
-Ensure that `scanner_domains.txt` exists in the same directory as `app.py` and contains at least one domain name. Additional domains should be on new lines.
+Ensure that `scanner_domains.txt` exists in the same directory as `app.py` that it contains at least one domain name. Additional domains should be on new lines.
+
 Optionally, one can pass `--infile <input file>` or `--outfile <output file>` to specify a custom path and filename.
 
 Then run:
@@ -29,16 +37,16 @@ Then run:
 
 By default, the application will log scan results to  `scanner_log.txt` if `--outfile` is not passed.
 
-To enable logging to the console pass `--debug` to `app.py`, for example:
+To enable logging to the console pass `--verbose` to `app.py`, for example:
 
-    python app.py --scan --debug --infile C:\domains.txt --outfile C:\scan_log.txt
+    python app.py --scan --verbose --infile C:\domains.txt --outfile C:\scan_log.txt
 
 ### Obtaining the Application
 
 ##### Using Git
 Clone this repository using Git:
 
-    git clone https://github.com/dephekt/crawler.git
+    git clone git@code.dephekt.net:dephekt/crawler.git
 
 Then change into the `crawler/` directory git created.
 
@@ -46,10 +54,7 @@ Then change into the `crawler/` directory git created.
 
 Checkout the release version you intend to run:
 
-    git checkout v1.2-alpha
-
-##### Downloading a Release Archive  
-Alternatively to using Git, one can download the latest release from the [releases](https://github.com/dephekt/crawler/releases) tab. Download a release, extract the archive, then change into the application directory and proceed to install a Python virtual environment and runtime dependencies.
+    git checkout <release tag>
 
 ### Setting up a Python Virtual Environment
 This is an optional, but highly recommended, standard practice to keep per-project Python dependencies isolated from system-wide installed modules.
@@ -57,7 +62,7 @@ This is an optional, but highly recommended, standard practice to keep per-proje
 ##### With Pipenv:
 To use Pipenv, install it with:
 
-    python -m pip install pipenv
+    python3 -m pip install --user pipenv
 
 ##### MacOS:
 Alternatively, pipenv may be installed on MacOS with Homebrew using:
@@ -74,13 +79,13 @@ Ubuntu 17.10 users can install it with `apt` using the APT PPA repository:
 
 When Pipenv is installed, change to the crawler app's root directory `crawler/` and run:
 
-    python -m pipenv install
+    python3 -m pipenv install
 
 This will create a new virtual environment and install all the Python modules necessary to run the application.
 
 You may need to activate the `pipenv shell` in your terminal to be in the proper environment context. You can do that from the project root directory `crawler/` with:
 
-    python -m pipenv shell
+    python3 -m pipenv shell
 
 For more information on using Pipenv, you can review its documentation [here](https://docs.pipenv.org/).  
 
@@ -99,4 +104,4 @@ This list may or may not be current. Always check `Pipfile` in the application r
 There will never be Python 2.x support for this; Python 2.7 support sunsets on January 1, 2020. See [this statement](http://python3statement.org/) regarding the move to Python 3.
 
 ### Bugs and Issues
-Please report any problems or feature requests using the [issues tab](https://github.com/dephekt/crawler/issues) on the GitHub project. Please include the domain which triggered the problem as well as the full Python traceback if an exception was encountered.
+Please report any problems or feature requests using the issue tracker on GitLab. Please include the domain which triggered the problem as well as the full Python traceback if an exception was encountered.
