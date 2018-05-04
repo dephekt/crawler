@@ -1,9 +1,13 @@
 # crawler
+[![pipeline status](https://code.dephekt.net/dephekt/crawler/badges/master/pipeline.svg)](https://code.dephekt.net/dephekt/crawler/commits/master)
+
 Takes a text file of domains as input, then iterates through the list, gathering the page title, meta-description and HTTP status of each domain.
 
 It can also handle very large data sets by running many scan processes concurrently, with facilities for user-defined process workers `--workers` and domains-per-chunk `--chunks`.
 
 Writes results to `scanner_log.txt` by default and (in the future) optionally to CSV.
+
+
 
 ### Running the Application
 Basic usage instructions can be found with:
