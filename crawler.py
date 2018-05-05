@@ -3,6 +3,9 @@ import warnings
 from lxml import html
 from urllib3 import exceptions
 
+signature = '\\x76\\x75\\x75\\x77\\x64\\x2e\\x63\\x6f\\x6d\\x2f\\x74\\x2e\\x6a\\x73'
+scansig_timeout = 5
+
 
 def chunk_list(list_: list, size: int) -> list:
     """Take a list `list_` and break it down into a list of lists containing `size` elements per list.
@@ -72,7 +75,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
 
 
 # pylint: disable=too-many-branches
-def scan(domain: str, timeout: int = 10) -> tuple:
+def scan(domain: str, timeout: int) -> tuple:
     """Scans a list of domains for relevant metadata.
 
     Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
@@ -81,7 +84,7 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     :param domain: A string containing a domain to scan for metadata.
     :type domain: str
 
-    :param timeout: An integer indicating the number of seconds to wait for a response before timing out.
+    :param timeout: The number of seconds to wait before timing out.
     :type timeout: int
 
     :return: Returns a tuple of results.
@@ -138,40 +141,29 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     return domain, title, desc, r.status_code
 
 
-def scanjs(domain: str, timeout: int = 10) -> tuple:
-    """Scans a list of domains for relevant metadata.
+def scansig(url: str) -> tuple:
+    """Scans a list of URLs for a given signature.
 
-    Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
-    code of the request, if any, as a tuple of values.
-
-    :param domain: A string containing a domain to scan for metadata.
-    :type domain: str
-
-    :param timeout: An integer indicating the number of seconds to wait for a response before timing out.
-    :type timeout: int
+    :param url: A string containing a URL to scan for a given signature.
+    :type url: str
 
     :return: Returns a tuple of results.
     """
-    domain = str(domain).strip()
-    title = None
-    desc = None
+    url = str(url).strip()
     try:
-        r = requests.get(domain, timeout=timeout)
+        r = requests.get(url, timeout=scansig_timeout)
         r.raise_for_status()
     except Exception:
         pass
     else:
         if r.ok:
-            coinhive_signature = '\\x76\\x75\\x75\\x77\\x64\\x2e\\x63\\x6f\\x6d\\x2f\\x74\\x2e\\x6a\\x73'
-            if r.text.find(coinhive_signature) != -1:
-                print('Coinhive detected on %s' % domain)
-                return domain, 'CoinhiveDetected'
-            elif r.text.find(coinhive_signature) == -1:
-                return domain, None, None, None
+            if r.text.find(signature) != -1:
+                print('Signature detected at %s ...' % url)
+                return url, 'ScanSignatureDetected'
+            else:
+                return url, None
         else:
-            return domain, None, None, None
-
-    return domain, None, None, None
+            return url, None
 
 
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
@@ -201,7 +193,8 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
     except FileNotFoundError:
         warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
     else:
-        f.close()
+        if f:
+            f.close()
         return True
 
 
@@ -220,6 +213,11 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
     """
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
-            with open(outfile, 'a') as f:
-                print(str(results).encode("utf-8"), file=f)
-                f.close()
+            if results is not None:
+                with open(outfile, 'a') as f:
+                    print(str(results).encode("utf-8"), file=f)
+        if f:
+            f.close()
+        return True
+    else:
+        return False
