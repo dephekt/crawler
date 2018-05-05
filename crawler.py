@@ -140,11 +140,14 @@ def scan(domain: str, timeout: int) -> tuple:
     return domain, title, desc, r.status_code
 
 
-def scansig(url: str, signature) -> tuple:
+def scansig(url: str, signature: str) -> tuple:
     """Scans a list of URLs for a given signature.
 
     :param url: A string containing a URL to scan for a given signature.
     :type url: str
+
+    :param signature: A string containing a signature to scan for.
+    :type signature: str
 
     :return: Returns a tuple of results.
     """

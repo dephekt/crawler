@@ -4,6 +4,7 @@ import logging
 import warnings
 from multiprocessing.dummy import Pool
 from multiprocessing import cpu_count
+from functools import partial
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--scan', help='perform a scan', action='store_true')
@@ -15,7 +16,6 @@ parser.add_argument('--scansig',
                     action='store_true',
                     )
 parser.add_argument('--sig', help='sig', action='store')
-parser.add_argument('--url', help='url', action='store')
 parser.add_argument('--infile', help='set a custom domain input file location [default: scanner_domains.txt]',)
 parser.add_argument('--outfile', help='set a custom output log file location [default: scanner_log.txt]',)
 parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true',)
@@ -30,6 +30,10 @@ if args.debug:
 elif args.verbose:
     logging.basicConfig(level=logging.INFO)
     logging.info('Informative logging to console is enabled ...')
+
+if args.scansig is True and args.sig is None:
+    warnings.warn('If `--scansig` is passed you must pass a signature to scan for using `--sig <signature>`')
+    exit(1)
 
 if args.infile:
     logging.info('Using user provided domain input file %s ...', args.infile)
@@ -107,7 +111,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         if args.scansig is True and args.scan is False:
             logging.info('Signature scanning because `--scansig` was given at runtime ...')
-            map_results = pool.starmap(crawler.scansig, [(args.url, args.sig)])
+            map_results = pool.map(partial(crawler.scansig, signature=args.sig), domains)
             if args.outfile:
                 log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
             else:
