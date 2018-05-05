@@ -220,10 +220,6 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
     """
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
-            try:
-                with open(outfile, 'a') as f:
-                    print(str(results).encode("utf-8"), file=f)
-                    return True
-            except FileNotFoundError:
-                warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
-                return False
+            with open(outfile, 'a') as f:
+                print(str(results).encode("utf-8"), file=f)
+                f.close()
