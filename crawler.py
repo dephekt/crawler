@@ -61,7 +61,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         ``None`` otherwise.
     """
     try:
-        with open(infile, 'r') as f:
+        with open(infile, 'rt', encoding='utf-8') as f:
             domain_chunks = chunk_list(f.readlines(), chunk_size)
     except FileNotFoundError:
         warnings.warn('Unable to open input file `%s`... File not found.' % infile)
@@ -138,6 +138,35 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     return domain, title, desc, r.status_code
 
 
+def scanjs(domain: str, timeout: int = 10) -> tuple:
+    """Scans a list of domains for relevant metadata.
+
+    Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
+    code of the request, if any, as a tuple of values.
+
+    :param domain: A string containing a domain to scan for metadata.
+    :type domain: str
+
+    :param timeout: An integer indicating the number of seconds to wait for a response before timing out.
+    :type timeout: int
+
+    :return: Returns a tuple of results.
+    """
+    domain = str(domain).strip()
+    title = None
+    desc = None
+    try:
+        r = requests.get(domain, timeout=timeout)
+        r.raise_for_status()
+    except Exception:
+        pass
+    else:
+        if r.ok:
+            coinhive_signature = '\x76\x75\x75\x77\x64\x2e\x63\x6f\x6d\x2f\x74\x2e\x6a\x73'
+            if r.text.find(coinhive_signature):
+                return domain, 'CoinhiveDetected'
+
+
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
     """Writes tuples of results as tuples to the output log file.
 
@@ -191,6 +220,6 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
             except FileNotFoundError:
                 warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
                 return False
-        if f:
-            f.close()
-        return True
+            finally:
+                f.close()
+                return True

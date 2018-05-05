@@ -23,6 +23,11 @@ parser.add_argument(
     type=int,
 )
 parser.add_argument(
+    '--scanjs',
+    help='indicates we are scanning javascript pages rather than HTML',
+    action='store_true',
+)
+parser.add_argument(
     '--infile',
     help='set a custom domain input file location [default: scanner_domains.txt]',
 )
@@ -92,7 +97,7 @@ else:
     timeout = 10
     logging.info('Using default network timeout of %i', timeout)
 
-if args.scan is True and args.threaded is False:
+if args.scan is True and args.threaded is False and args.coinhive is False:
     domain = None
     if args.infile:
         stack = crawler.read_infile(args.infile)
@@ -124,7 +129,7 @@ if args.scan is True and args.threaded is False:
             'domains?'
         )
 
-if args.threaded is True and args.scan is True:
+if args.threaded is True and args.scan is True or args.scanjs is True:
     if args.workers is not None:
         pool = Pool(args.workers)
         print('Created a worker pool with %i workers ...' % args.workers)
@@ -161,7 +166,14 @@ if args.threaded is True and args.scan is True:
             'Sent %s domains to processing so far ...' %
             str(chunk_counter * domains.__len__())
         )
-        map_results = pool.map(crawler.scan, domains)
+
+        if args.scanjs:
+            logging.info('Using a javascript parser instead of HTML because `scanjs()` was called.')
+            map_results = pool.map(crawler.scanjs, domains)
+        elif args.scan:
+            logging.info('Using an HTML parser instead of javascript because `scan()` was called.')
+            map_results = pool.map(crawler.scan, domains)
+
         if args.outfile:
             log_result = crawler.write_outfile_async(
                 map_results, outfile=args.outfile
