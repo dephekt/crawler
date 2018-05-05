@@ -160,10 +160,8 @@ def scansig(url: str) -> tuple:
             if r.text.find(signature) != -1:
                 print('Signature detected at %s ...' % url)
                 return url, 'ScanSignatureDetected'
-            else:
-                return url, None
-        else:
             return url, None
+        return url, None
 
 
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
