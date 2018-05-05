@@ -14,6 +14,8 @@ parser.add_argument('--scansig',
                     help='indicates we are scanning for a signature match rather than metadata',
                     action='store_true',
                     )
+parser.add_argument('--sig', help='sig', action='store')
+parser.add_argument('--url', help='url', action='store')
 parser.add_argument('--infile', help='set a custom domain input file location [default: scanner_domains.txt]',)
 parser.add_argument('--outfile', help='set a custom output log file location [default: scanner_log.txt]',)
 parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true',)
@@ -105,7 +107,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         if args.scansig is True and args.scan is False:
             logging.info('Signature scanning because `--scansig` was given at runtime ...')
-            map_results = pool.map(crawler.scansig, domains)
+            map_results = pool.starmap(crawler.scansig, [(args.url, args.sig)])
             if args.outfile:
                 log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
             else:

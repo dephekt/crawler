@@ -3,7 +3,6 @@ import warnings
 from lxml import html
 from urllib3 import exceptions
 
-signature = '\\x76\\x75\\x75\\x77\\x64\\x2e\\x63\\x6f\\x6d\\x2f\\x74\\x2e\\x6a\\x73'
 scansig_timeout = 5
 
 
@@ -141,7 +140,7 @@ def scan(domain: str, timeout: int) -> tuple:
     return domain, title, desc, r.status_code
 
 
-def scansig(url: str) -> tuple:
+def scansig(url: str, signature) -> tuple:
     """Scans a list of URLs for a given signature.
 
     :param url: A string containing a URL to scan for a given signature.
@@ -150,6 +149,7 @@ def scansig(url: str) -> tuple:
     :return: Returns a tuple of results.
     """
     url = str(url).strip()
+    print(url + ' ' + signature)
     try:
         r = requests.get(url, timeout=scansig_timeout)
         r.raise_for_status()
