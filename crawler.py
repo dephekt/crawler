@@ -3,6 +3,8 @@ import warnings
 from lxml import html
 from urllib3 import exceptions
 
+scansig_timeout = 5
+
 
 def chunk_list(list_: list, size: int) -> list:
     """Take a list `list_` and break it down into a list of lists containing `size` elements per list.
@@ -61,7 +63,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         ``None`` otherwise.
     """
     try:
-        with open(infile, 'r') as f:
+        with open(infile, 'rt', encoding='utf-8') as f:
             domain_chunks = chunk_list(f.readlines(), chunk_size)
     except FileNotFoundError:
         warnings.warn('Unable to open input file `%s`... File not found.' % infile)
@@ -72,7 +74,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
 
 
 # pylint: disable=too-many-branches
-def scan(domain: str, timeout: int = 10) -> tuple:
+def scan(domain: str, timeout: int) -> tuple:
     """Scans a list of domains for relevant metadata.
 
     Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
@@ -81,7 +83,7 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     :param domain: A string containing a domain to scan for metadata.
     :type domain: str
 
-    :param timeout: An integer indicating the number of seconds to wait for a response before timing out.
+    :param timeout: The number of seconds to wait before timing out.
     :type timeout: int
 
     :return: Returns a tuple of results.
@@ -138,6 +140,33 @@ def scan(domain: str, timeout: int = 10) -> tuple:
     return domain, title, desc, r.status_code
 
 
+def scansig(url: str, signature: str) -> tuple:
+    """Scans a list of URLs for a given signature.
+
+    :param url: A string containing a URL to scan for a given signature.
+    :type url: str
+
+    :param signature: A string containing a signature to scan for.
+    :type signature: str
+
+    :return: Returns a tuple of results.
+    """
+    url = str(url).strip()
+    print(url + ' ' + signature)
+    try:
+        r = requests.get(url, timeout=scansig_timeout)
+        r.raise_for_status()
+    except Exception:
+        pass
+    else:
+        if r.ok:
+            if r.text.find(signature) != -1:
+                print('Signature detected at %s ...' % url)
+                return url, 'ScanSignatureDetected'
+            return url, None
+        return url, None
+
+
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
     """Writes tuples of results as tuples to the output log file.
 
@@ -165,7 +194,8 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
     except FileNotFoundError:
         warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
     else:
-        f.close()
+        if f:
+            f.close()
         return True
 
 
@@ -184,13 +214,11 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
     """
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
-            try:
-                with open(outfile, 'at') as f:
+            if results is not None:
+                with open(outfile, 'a') as f:
                     print(str(results).encode("utf-8"), file=f)
-                    return True
-            except FileNotFoundError:
-                warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
-                return False
         if f:
             f.close()
         return True
+    else:
+        return False
