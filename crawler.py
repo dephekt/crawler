@@ -152,7 +152,6 @@ def scansig(url: str, signature: str) -> tuple:
     :return: Returns a tuple of results.
     """
     url = str(url).strip()
-    print(url + ' ' + signature)
     try:
         r = requests.get(url, timeout=scansig_timeout)
         r.raise_for_status()
