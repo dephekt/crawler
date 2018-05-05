@@ -97,7 +97,7 @@ else:
     timeout = 10
     logging.info('Using default network timeout of %i', timeout)
 
-if args.scan is True and args.threaded is False and args.coinhive is False:
+if args.scan is True and args.threaded is False and args.scanjs is False:
     domain = None
     if args.infile:
         stack = crawler.read_infile(args.infile)
@@ -175,9 +175,7 @@ if args.threaded is True and args.scan is True or args.scanjs is True:
             map_results = pool.map(crawler.scan, domains)
 
         if args.outfile:
-            log_result = crawler.write_outfile_async(
-                map_results, outfile=args.outfile
-            )
+            log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
         else:
             log_result = crawler.write_outfile_async(map_results)
 

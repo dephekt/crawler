@@ -162,9 +162,16 @@ def scanjs(domain: str, timeout: int = 10) -> tuple:
         pass
     else:
         if r.ok:
-            coinhive_signature = '\x76\x75\x75\x77\x64\x2e\x63\x6f\x6d\x2f\x74\x2e\x6a\x73'
-            if r.text.find(coinhive_signature):
+            coinhive_signature = '\\x76\\x75\\x75\\x77\\x64\\x2e\\x63\\x6f\\x6d\\x2f\\x74\\x2e\\x6a\\x73'
+            if r.text.find(coinhive_signature) != -1:
+                print('Coinhive detected on %s' % domain)
                 return domain, 'CoinhiveDetected'
+            elif r.text.find(coinhive_signature) == -1:
+                return domain, None, None, None
+        else:
+            return domain, None, None, None
+
+    return domain, None, None, None
 
 
 def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
@@ -214,12 +221,9 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
             try:
-                with open(outfile, 'at') as f:
+                with open(outfile, 'a') as f:
                     print(str(results).encode("utf-8"), file=f)
                     return True
             except FileNotFoundError:
                 warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
                 return False
-            finally:
-                f.close()
-                return True
