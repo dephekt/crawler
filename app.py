@@ -35,6 +35,10 @@ if args.scansig is True and args.sig is None:
     warnings.warn('If `--scansig` is passed you must pass a signature to scan for using `--sig <signature>`')
     exit(1)
 
+if args.scan is True and args.scansig is True:
+    warnings.warn('`--scan` and `--scansig` are mutually exclusive ... You must specify one or the other!')
+    exit(1)
+
 if args.infile:
     logging.info('Using user provided domain input file %s ...', args.infile)
 else:
@@ -119,11 +123,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         elif args.scan is True and args.scansig is False:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
-            map_results = pool.map(crawler.scan, domains)
-
-        elif args.scan is True and args.scansig is True:
-            warnings.warn('`--scan` and `--scansig` are mutually exclusive ... You must specify one or the other!')
-            exit(1)
+            map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
 
         if log_result:
             logging.info('Successfully wrote a batch of results to the output log ...')
