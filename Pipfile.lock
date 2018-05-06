@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "db41830bc77d4171dcaad7b5fdc34b0338a16ba9c1a04736555adb50e2d88ab7"
+            "sha256": "110fdf37418845ee2fb0958dadb3b519f1b7061a3588a12ade1253b032fd7a4b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -29,14 +29,6 @@
                 "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
             ],
             "version": "==3.0.4"
-        },
-        "django": {
-            "hashes": [
-                "sha256:26b34f4417aa38d895b6b5307177b51bc3f4d53179d8696a5c19dcb50582523c",
-                "sha256:71d1a584bb4ad2b4f933d07d02c716755c1394feaac1ce61ce37843ac5401092"
-            ],
-            "index": "pypi",
-            "version": "==2.0.5"
         },
         "idna": {
             "hashes": [
@@ -79,13 +71,6 @@
             "index": "pypi",
             "version": "==4.2.1"
         },
-        "pytz": {
-            "hashes": [
-                "sha256:65ae0c8101309c45772196b21b74c46b2e5d11b6275c45d251b150d5da334555",
-                "sha256:c06425302f2cf668f1bba7a0a03f3c1d34d4ebeef2c72003da308b3947c7f749"
-            ],
-            "version": "==2018.4"
-        },
         "requests": {
             "hashes": [
                 "sha256:6a1b267aa90cac58ac3a765d067950e7dbbf75b1da07e895d1f594193a40a38b",
@@ -116,6 +101,14 @@
                 "sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0"
             ],
             "version": "==2018.4.16"
+        },
+        "colorama": {
+            "hashes": [
+                "sha256:463f8483208e921368c9f306094eb6f725c6ca42b0f97e313cb5d5512459feda",
+                "sha256:48eb22f4f8461b1df5734a074b57042430fb06e1d61bd1e11b078c0fe6d7a1f1"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==0.3.9"
         },
         "dodgy": {
             "hashes": [
@@ -189,10 +182,10 @@
         },
         "pep8-naming": {
             "hashes": [
-                "sha256:0b82da414024f290e0e7aad80d9a7614d6a85bedd82304deeb2e4e0a74f8968b",
-                "sha256:5a2a085340b1d530605a7f4a96816433be43504c58eace799dbacdcfd6febe9d"
+                "sha256:434c7947da02f789312d3aa4a3f305953575b501a6acebbc643563e33150ebea",
+                "sha256:efe8333af257499fb121194f0f65c8a56ac68b9a003467906fa581ec35299842"
             ],
-            "version": "==0.5.0"
+            "version": "==0.6.1"
         },
         "pipenv": {
             "hashes": [
