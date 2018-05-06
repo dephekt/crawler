@@ -3,8 +3,6 @@ import warnings
 from lxml import html
 from urllib3 import exceptions
 
-scansig_timeout = 5
-
 
 def chunk_list(list_: list, size: int) -> list:
     """Take a list `list_` and break it down into a list of lists containing `size` elements per list.
@@ -140,7 +138,7 @@ def scan(domain: str, timeout: int) -> tuple:
     return domain, title, desc, r.status_code
 
 
-def scansig(url: str, signature: str) -> tuple:
+def scansig(url: str, signature: str, timeout: int = 5) -> tuple:
     """Scans a list of URLs for a given signature.
 
     :param url: A string containing a URL to scan for a given signature.
@@ -149,11 +147,14 @@ def scansig(url: str, signature: str) -> tuple:
     :param signature: A string containing a signature to scan for.
     :type signature: str
 
+    :param timeout: A number of seconds to wait for a request before timing out.
+    :type timeout: int
+
     :return: Returns a tuple of results.
     """
     url = str(url).strip()
     try:
-        r = requests.get(url, timeout=scansig_timeout)
+        r = requests.get(url, timeout=timeout)
         r.raise_for_status()
     except Exception:
         pass

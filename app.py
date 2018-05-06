@@ -111,7 +111,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         if args.scansig is True and args.scan is False:
             logging.info('Signature scanning because `--scansig` was given at runtime ...')
-            map_results = pool.map(partial(crawler.scansig, signature=args.sig), domains)
+            map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
             if args.outfile:
                 log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
             else:
