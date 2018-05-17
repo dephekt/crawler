@@ -160,7 +160,7 @@ def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool 
 
     try:
         with open(outfile, log_file_action) as f:
-            print(str(results).encode("utf-8"), file=f)
+            f.write(results)
     except FileNotFoundError:
         warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
     else:
