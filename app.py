@@ -163,8 +163,6 @@ if args.threaded is True and args.scan is True:
         )
         map_results = pool.map(crawler.scan, domains)
         if args.outfile:
-            log_result = crawler.write_outfile_async(
-                map_results, outfile=args.outfile
-            )
+            crawler.write_outfile_async(map_results, outfile=args.outfile)
         else:
-            log_result = crawler.write_outfile_async(map_results)
+            crawler.write_outfile_async(map_results)
