@@ -168,12 +168,3 @@ if args.threaded is True and args.scan is True:
             )
         else:
             log_result = crawler.write_outfile_async(map_results)
-
-        if log_result:
-            logging.info(
-                'Successfully wrote a batch of results to the output log ...'
-            )
-        else:
-            logging.info(
-                'Failed to write a batch of results to the output log ...'
-            )
