@@ -123,9 +123,4 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         elif args.scan is True and args.scansig is False:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
-            map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
-
-        if log_result:
-            logging.info('Successfully wrote a batch of results to the output log ...')
-        else:
-            logging.info('Failed to write a batch of results to the output log ...')
+            pool.map(partial(crawler.scan, timeout=timeout), domains)

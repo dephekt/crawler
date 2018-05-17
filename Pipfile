@@ -8,7 +8,6 @@ lxml = "*"
 requests = "*"
 
 [dev-packages]
-"flake8" = "*"
 pipenv = "*"
 prospector = "*"
 

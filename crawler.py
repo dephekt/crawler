@@ -61,18 +61,17 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         ``None`` otherwise.
     """
     try:
-        with open(infile, 'rt', encoding='utf-8') as f:
-            domain_chunks = chunk_list(f.readlines(), chunk_size)
+        with open(infile, 'rt') as f:
+            domain_chunks = chunk_list(f.read().splitlines(), chunk_size)
     except FileNotFoundError:
         warnings.warn('Unable to open input file `%s`... File not found.' % infile)
         return [None]
     else:
-        f.close()
         return domain_chunks
 
 
 # pylint: disable=too-many-branches
-def scan(domain: str, timeout: int) -> tuple:
+def scan(domain: str, timeout: int = 10) -> str:
     """Scans a list of domains for relevant metadata.
 
     Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
@@ -86,56 +85,56 @@ def scan(domain: str, timeout: int) -> tuple:
 
     :return: Returns a tuple of results.
     """
-    domain = str(domain).strip()
-    title = None
-    desc = None
+    domain = domain.strip('"')
+    title = 'None'
+    desc = 'None'
 
     try:
         r = requests.get('http://' + domain + '/', timeout=timeout)
         r.raise_for_status()
     except UnicodeError:
-        return domain, None, None, 'UnicodeError'
+        return domain + ',' + title + ',' + desc + ',' + 'UnicodeError'
     except exceptions.LocationValueError:
-        return domain, None, None, None
+        return domain + ',' + title + ',' + desc + ',' + 'LocationValueError'
     except exceptions.HeaderParsingError:
         warnings.warn('Error parsing headers for %s ...' % r.url)
     except requests.ConnectionError:
-        return domain, title, desc, None
+        return domain + ',' + title + ',' + desc + ',' + 'ConnectionError'
     except requests.HTTPError:
-        return domain, title, desc, None
+        return domain + ',' + title + ',' + desc + ',' + 'HTTPError'
     except requests.Timeout:
-        return domain, title, desc, 'Timeout'
+        return domain + ',' + title + ',' + desc + ',' + 'Timeout'
     except requests.TooManyRedirects:
-        return domain, title, desc, 'RedirectLoop'
+        return domain + ',' + title + ',' + desc + ',' + 'RedirectLoop'
     except requests.exceptions.ContentDecodingError:
-        return domain, title, desc, 'ContentDecodingError'
+        return domain + ',' + title + ',' + desc + ',' + 'ContentDecodingError'
     except requests.exceptions.ChunkedEncodingError:
-        return domain, title, desc, 'ChunkedEncodingError'
+        return domain + ',' + title + ',' + desc + ',' + 'ChunkedEncodingError'
     except requests.exceptions.InvalidSchema:
-        return domain, title, desc, 'InvalidSchema'
+        return domain + ',' + title + ',' + desc + ',' + 'InvalidSchema'
     except requests.exceptions.InvalidURL:
-        return domain, title, desc, 'InvalidURL'
+        return domain + ',' + title + ',' + desc + ',' + 'InvalidURL'
     except requests.exceptions.InvalidHeader:
-        return domain, title, desc, 'InvalidHeader'
+        return domain + ',' + title + ',' + desc + ',' + 'InvalidHeader'
     except requests.exceptions.FileModeWarning:
-        return domain, title, desc, 'FileModeWarning'
+        return domain + ',' + title + ',' + desc + ',' + 'FileModeWarning'
 
     try:
         root = html.fromstring(r.content)
     except html.etree.ParserError:
-        return domain, title, desc, 'Empty'
+        return domain + ',' + title + ',' + desc + ',' + 'Empty'
 
     try:
         title = root.xpath('/html/head/title')[0].text
     except Exception:
-        title = None
+        title = 'None'
 
     try:
         desc = root.xpath('/html/head/meta[@name="description"]/@content')[0]
     except Exception:
-        desc = None
+        desc = 'None'
 
-    return domain, title, desc, r.status_code
+    return domain + ',' + title + ',' + desc + ',' + str(r.status_code)
 
 
 def scansig(url: str, signature: str, timeout: int = 5) -> tuple:
@@ -167,7 +166,7 @@ def scansig(url: str, signature: str, timeout: int = 5) -> tuple:
         return url, None
 
 
-def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
+def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
     """Writes tuples of results as tuples to the output log file.
 
     This is for processing synchronous results from a non-threaded scan.
@@ -190,16 +189,12 @@ def write_outfile(results: tuple, outfile: str = 'scanner_log.txt', clobber: boo
 
     try:
         with open(outfile, log_file_action) as f:
-            print(str(results).encode("utf-8"), file=f)
+            f.write(results)
     except FileNotFoundError:
         warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
-    else:
-        if f:
-            f.close()
-        return True
 
 
-def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> bool:
+def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
     """Iterates on a list of tuples of results and writes each result as a tuple to the output log file.
 
     This is for processing results of an asynchronous/threaded scan.
@@ -215,10 +210,8 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt') -> boo
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
             if results is not None:
-                with open(outfile, 'a') as f:
-                    print(str(results).encode("utf-8"), file=f)
-        if f:
-            f.close()
+                with open(outfile, 'at') as f:
+                    f.write(results + '\n')
         return True
     else:
         return False
