@@ -125,12 +125,12 @@ def scan(domain: str, timeout: int = 10) -> str:
         return domain + ',' + title + ',' + desc + ',' + 'Empty'
 
     try:
-        title = root.xpath('/html/head/title')[0].text
+        title = "'" + root.xpath('/html/head/title')[0].text + "'"
     except Exception:
         title = 'None'
 
     try:
-        desc = root.xpath('/html/head/meta[@name="description"]/@content')[0]
+        desc = "'" + root.xpath('/html/head/meta[@name="description"]/@content')[0] + "'"
     except Exception:
         desc = 'None'
 
@@ -212,6 +212,3 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
             if results is not None:
                 with open(outfile, 'at') as f:
                     f.write(results + '\n')
-        return True
-    else:
-        return False

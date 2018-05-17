@@ -74,9 +74,9 @@ if args.scan is True and args.threaded is False and args.scansig is False:
                 if domain is not None:
                     scan_results = crawler.scan(domain, timeout=timeout)
                     if args.outfile:
-                        log_status = crawler.write_outfile(scan_results, args.outfile, args.clobber)
+                        crawler.write_outfile(scan_results, args.outfile, args.clobber)
                     else:
-                        log_status = crawler.write_outfile(scan_results, clobber=args.clobber)
+                        crawler.write_outfile(scan_results, clobber=args.clobber)
                     if args.debug:
                         try:
                             print(str(scan_results))
@@ -117,10 +117,17 @@ if args.threaded is True and args.scan is True or args.scansig is True:
             logging.info('Signature scanning because `--scansig` was given at runtime ...')
             map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
             if args.outfile:
-                log_result = crawler.write_outfile_async(map_results, outfile=args.outfile)
+                crawler.write_outfile_async(map_results, outfile=args.outfile)
             else:
-                log_result = crawler.write_outfile_async(map_results)
+                crawler.write_outfile_async(map_results)
 
         elif args.scan is True and args.scansig is False:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
-            pool.map(partial(crawler.scan, timeout=timeout), domains)
+            map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
+
+        print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
+        map_results = pool.map(crawler.scan, domains)
+        if args.outfile:
+            crawler.write_outfile_async(map_results, outfile=args.outfile)
+        else:
+            crawler.write_outfile_async(map_results)
