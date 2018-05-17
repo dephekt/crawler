@@ -211,4 +211,4 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
         for results in iterable:
             if results is not None:
                 with open(outfile, 'at') as f:
-                    f.write(results + '\n')
+                    f.write(results + '\r\n')
