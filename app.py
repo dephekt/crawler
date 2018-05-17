@@ -125,7 +125,6 @@ if args.threaded is True and args.scan is True or args.scansig is True:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
             map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
 
-        print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
         map_results = pool.map(crawler.scan, domains)
         if args.outfile:
             crawler.write_outfile_async(map_results, outfile=args.outfile)
