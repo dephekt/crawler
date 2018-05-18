@@ -1,5 +1,5 @@
 # crawler
-[![pipeline status](https://code.dephekt.net/dephekt/crawler/badges/master/pipeline.svg)](https://code.dephekt.net/dephekt/crawler/commits/master)
+[![pipeline status](https://gitlab.com/dephekt/crawler/badges/master/pipeline.svg)](https://gitlab.com/dephekt/crawler/commits/master)
 
 Takes a text file of domains as input, then iterates through the list, gathering the page title, meta-description and HTTP status of each domain.
 
