@@ -90,7 +90,7 @@ def scan(domain: str, timeout: int = 4) -> str:
     desc = 'None'
 
     try:
-        r = requests.get('http://{0}/'.format(domain), timeout=timeout)
+        r = requests.get('http://{0}/'.format(domain), timeout=timeout, verify=False)
         r.raise_for_status()
     except UnicodeError:
         return '{0},{1},{2},{3}'.format(domain, title, desc, 'UnicodeError')
@@ -153,7 +153,7 @@ def scansig(url: str, signature: str, timeout: int = 4) -> str:
     """
     url = str(url).strip()
     try:
-        r = requests.get(url, timeout=timeout)
+        r = requests.get(url, timeout=timeout, verify=False)
         r.raise_for_status()
     except Exception:
         pass
