@@ -98,6 +98,8 @@ if args.threaded is True and args.scan is True or args.scansig is True:
         print('Mapping %i domains per chunk to worker pool ...' % args.chunks)
     elif args.infile:
         domain_chunks = crawler.read_infile_threaded(args.infile)
+    elif args.chunks:
+        domain_chunks = crawler.read_infile_threaded(chunk_size=args.chunks)
     else:
         domain_chunks = crawler.read_infile_threaded()
 
