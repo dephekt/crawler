@@ -58,7 +58,7 @@ if args.timeout:
     timeout = args.timeout
     logging.info('Using user-provided network timeout of %i ...', args.timeout)
 else:
-    timeout = 10
+    timeout = 5
     logging.info('Using default network timeout of %i ...', timeout)
 
 if args.scan is True and args.threaded is False:
@@ -111,6 +111,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
     chunk_counter = 0
     log_result = False
+    map_results = None
     for domains in domain_chunks:
         chunk_counter += 1
         print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
@@ -127,7 +128,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
             map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
 
-        if args.outfile:
+        if args.outfile is True and map_results is not None:
             crawler.write_outfile_async(map_results, outfile=args.outfile)
-        else:
+        elif args.outfile is False and map_results is not None:
             crawler.write_outfile_async(map_results)
