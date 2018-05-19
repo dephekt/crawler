@@ -18,7 +18,6 @@ parser.add_argument('--scansig',
 parser.add_argument('--sig', help='sig', action='store')
 parser.add_argument('--infile', help='set a custom domain input file location [default: scanner_domains.txt]',)
 parser.add_argument('--outfile', help='set a custom output log file location [default: scanner_log.txt]',)
-parser.add_argument('--clobber', help='wipe and reuse the log instead of appending to it', action='store_true',)
 parser.add_argument('--debug', help='enable debugging output to the console', action='store_true',)
 parser.add_argument('--verbose', help='enable informational output to the console', action='store_true',)
 parser.add_argument('--timeout', help='number of seconds to wait for a scan response before timing out', type=int,)
@@ -49,11 +48,6 @@ if args.outfile:
 else:
     logging.info('Using default scan output file as `--outfile` was not provided at runtime ...')
 
-if args.clobber:
-    logging.info('Clobbering log file since `--clobber` was provided at runtime ...')
-else:
-    logging.info('Output file will be appended to if it exists as `--clobber` was not provided at runtime ...')
-
 if args.timeout:
     timeout = args.timeout
     logging.info('Using user-provided network timeout of %i ...', args.timeout)
@@ -74,9 +68,9 @@ if args.scan is True and args.threaded is False:
                 if domain is not None:
                     scan_results = crawler.scan(domain, timeout=timeout)
                     if args.outfile:
-                        crawler.write_outfile(scan_results, args.outfile, args.clobber)
+                        crawler.write_outfile(scan_results, args.outfile)
                     else:
-                        crawler.write_outfile(scan_results, clobber=args.clobber)
+                        crawler.write_outfile(scan_results)
                     if args.debug:
                         try:
                             print(str(scan_results))
