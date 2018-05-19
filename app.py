@@ -58,7 +58,7 @@ if args.timeout:
     timeout = args.timeout
     logging.info('Using user-provided network timeout of %i ...', args.timeout)
 else:
-    timeout = 5
+    timeout = 4
     logging.info('Using default network timeout of %i ...', timeout)
 
 if args.scan is True and args.threaded is False:

@@ -34,7 +34,7 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
     :return: Returns a list of domains if successful, returns a list containing ``None`` otherwise.
     """
     try:
-        with open(infile, 'r') as f:
+        with open(infile, 'rt') as f:
             stack = f.readlines()
             f.close()
             return stack
@@ -71,7 +71,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
 
 
 # pylint: disable=too-many-branches
-def scan(domain: str, timeout: int = 10) -> str:
+def scan(domain: str, timeout: int = 4) -> str:
     """Scans a list of domains for relevant metadata.
 
     Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
@@ -137,7 +137,7 @@ def scan(domain: str, timeout: int = 10) -> str:
     return domain + ',' + title + ',' + desc + ',' + str(r.status_code)
 
 
-def scansig(url: str, signature: str, timeout: int = 5) -> str:
+def scansig(url: str, signature: str, timeout: int = 4) -> str:
     """Scans a list of URLs for a given signature.
 
     :param url: A string containing a URL to scan for a given signature.
@@ -160,13 +160,13 @@ def scansig(url: str, signature: str, timeout: int = 5) -> str:
     else:
         if r.ok:
             if r.text.find(signature) != -1:
-                print('Signature detected at %s ...' % url)
-                return url + ',' + 'ScanSignatureDetected'
-            return url + ',' + 'None'
-        return url + ',' + 'None'
+                print('Signature detected at {0} ...'.format(url))
+                return '{0},ScanSignatureDetected'.format(url)
+            return '{0},None'.format(url)
+        return '{0},None'.format(url)
 
 
-def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool = False):
+def write_outfile(results: str, outfile: str = 'scanner_log.txt'):
     """Writes tuples of results as tuples to the output log file.
 
     This is for processing synchronous results from a non-threaded scan.
@@ -177,21 +177,13 @@ def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool 
     :param outfile: A string containing the location of the output log file. Uses ``scanner_log.txt`` by default.
     :type outfile: str
 
-    :param clobber: A boolean to determine if an existing log should be clobbered or not.
-    :type clobber: bool
-
     :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
-    if clobber:
-        log_file_action = 'wt'
-    else:
-        log_file_action = 'at'
-
     try:
-        with open(outfile, log_file_action) as f:
+        with open(outfile, 'at') as f:
             f.write(results)
     except FileNotFoundError:
-        warnings.warn('Unable to open output file `%s`... File not found.' % outfile)
+        warnings.warn('Unable to open output file {0}'.format(outfile))
 
 
 def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
@@ -210,5 +202,8 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
     if iterable.__len__() is not 0 or iterable.__len__() is not False:
         for results in iterable:
             if results is not None:
-                with open(outfile, 'at') as f:
-                    f.write(results + '\n')
+                try:
+                    with open(outfile, 'at') as f:
+                        f.write(results + '\n')
+                except FileNotFoundError:
+                    warnings.warn('Unable to open output file {0}'.format(outfile))
