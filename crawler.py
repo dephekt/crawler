@@ -2,6 +2,9 @@ import requests
 import warnings
 from lxml import html
 from urllib3 import exceptions
+from urllib3 import disable_warnings
+
+disable_warnings()
 
 
 def chunk_list(list_: list, size: int) -> list:
