@@ -61,7 +61,7 @@ else:
     timeout = 10
     logging.info('Using default network timeout of %i ...', timeout)
 
-if args.scan is True and args.threaded is False and args.scansig is False:
+if args.scan is True and args.threaded is False:
     if args.infile:
         stack = crawler.read_infile(args.infile)
     else:
@@ -113,7 +113,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
         chunk_counter += 1
         print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
 
-        if args.scansig is True and args.scan is False:
+        if args.scansig:
             logging.info('Signature scanning because `--scansig` was given at runtime ...')
             map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
             if args.outfile:
@@ -121,11 +121,10 @@ if args.threaded is True and args.scan is True or args.scansig is True:
             else:
                 crawler.write_outfile_async(map_results)
 
-        elif args.scan is True and args.scansig is False:
+        elif args.scan:
             logging.info('Metadata scanning because `--scan` was given at runtime ...')
             map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
 
-        map_results = pool.map(crawler.scan, domains)
         if args.outfile:
             crawler.write_outfile_async(map_results, outfile=args.outfile)
         else:

@@ -137,7 +137,7 @@ def scan(domain: str, timeout: int = 10) -> str:
     return domain + ',' + title + ',' + desc + ',' + str(r.status_code)
 
 
-def scansig(url: str, signature: str, timeout: int = 5) -> tuple:
+def scansig(url: str, signature: str, timeout: int = 5) -> str:
     """Scans a list of URLs for a given signature.
 
     :param url: A string containing a URL to scan for a given signature.
@@ -161,12 +161,12 @@ def scansig(url: str, signature: str, timeout: int = 5) -> tuple:
         if r.ok:
             if r.text.find(signature) != -1:
                 print('Signature detected at %s ...' % url)
-                return url, 'ScanSignatureDetected'
-            return url, None
-        return url, None
+                return url + ',' + 'ScanSignatureDetected'
+            return url + ',' + 'None'
+        return url + ',' + 'None'
 
 
-def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool = False) -> bool:
+def write_outfile(results: str, outfile: str = 'scanner_log.txt', clobber: bool = False):
     """Writes tuples of results as tuples to the output log file.
 
     This is for processing synchronous results from a non-threaded scan.
@@ -211,4 +211,4 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
         for results in iterable:
             if results is not None:
                 with open(outfile, 'at') as f:
-                    f.write(results + '\r\n')
+                    f.write(results + '\n')
