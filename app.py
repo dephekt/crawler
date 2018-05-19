@@ -39,21 +39,21 @@ if args.scan is True and args.scansig is True:
     exit(1)
 
 if args.infile:
-    logging.info('Using user provided domain input file %s ...', args.infile)
+    logging.info('Using user provided domain input file {0} ...'.format(args.infile))
 else:
     logging.info('Using default domain input file as `--infile` was not provided at runtime ...')
 
 if args.outfile:
-    logging.info('Using user provided output log file %s ...', args.outfile)
+    logging.info('Using user provided output log file {0} ...'.format(args.outfile))
 else:
     logging.info('Using default scan output file as `--outfile` was not provided at runtime ...')
 
 if args.timeout:
     timeout = args.timeout
-    logging.info('Using user-provided network timeout of %i ...', args.timeout)
+    logging.info('Using user-provided network timeout of {0} ...'.format(args.timeout))
 else:
     timeout = 4
-    logging.info('Using default network timeout of %i ...', timeout)
+    logging.info('Using default network timeout of {0} ...'.format(timeout))
 
 if args.scan is True and args.threaded is False:
     if args.infile:
@@ -77,19 +77,23 @@ if args.scan is True and args.threaded is False:
                         except UnicodeEncodeError:
                             pass
     except AttributeError:
-        warnings.warn('Unable to pop a domain off the stack ... Does infile contain domains?')
+        warnings.warn('Unable to pop a domain off the stack ... Does {0} contain domains?'.format(args.infile))
 
 if args.threaded is True and args.scan is True or args.scansig is True:
+    if args.scansig:
+        logging.info('Signature scanning because `--scansig` was given at runtime ...')
+    if args.scan:
+        logging.info('Metadata scanning because `--scan` was given at runtime ...')
     if args.workers is not None:
         pool = Pool(args.workers)
-        print('Created a worker pool with %i workers ...' % args.workers)
+        print('Created a worker pool with {0} workers ...'.format(args.workers))
     else:
         pool = Pool(cpu_count())
-        print('Created a worker pool with %i workers ...' % cpu_count())
+        print('Created a worker pool with {0} workers ...'.format(cpu_count()))
 
     if args.infile and args.chunks:
         domain_chunks = crawler.read_infile_threaded(args.infile, args.chunks)
-        print('Mapping %i domains per chunk to worker pool ...' % args.chunks)
+        print('Mapping {0} domains per chunk to worker pool ...'.format(args.chunks))
     elif args.infile:
         domain_chunks = crawler.read_infile_threaded(args.infile)
     elif args.chunks:
@@ -98,20 +102,21 @@ if args.threaded is True and args.scan is True or args.scansig is True:
         domain_chunks = crawler.read_infile_threaded()
 
     if domain_chunks[0] is None:
-        warnings.warn('Unable to read any domain chunks from the provided domain input file %s ...' % args.infile)
+        warnings.warn(
+            'Unable to read any domain chunks from the provided domain input file {0} ...'.format(args.infile)
+        )
         exit(1)
     else:
-        print('This workload contains %i chunks to be processed ...' % domain_chunks.__len__())
+        print('This workload contains {0} chunks to be processed ...'.format(domain_chunks.__len__()))
 
     chunk_counter = 0
     log_result = False
     map_results = None
     for domains in domain_chunks:
         chunk_counter += 1
-        print('Sent %s domains to processing so far ...' % str(chunk_counter * domains.__len__()))
+        print('Sent {0} domains to processing so far ...'.format(str(chunk_counter * domains.__len__())))
 
         if args.scansig:
-            logging.info('Signature scanning because `--scansig` was given at runtime ...')
             map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
             if args.outfile:
                 crawler.write_outfile_async(map_results, outfile=args.outfile)
@@ -119,7 +124,6 @@ if args.threaded is True and args.scan is True or args.scansig is True:
                 crawler.write_outfile_async(map_results)
 
         elif args.scan:
-            logging.info('Metadata scanning because `--scan` was given at runtime ...')
             map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
 
         if args.outfile is True and map_results is not None:

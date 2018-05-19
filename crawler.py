@@ -39,7 +39,7 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
             f.close()
             return stack
     except FileNotFoundError:
-        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
+        warnings.warn('Unable to open input file `{0}`... File not found.'.format(infile))
         return [None]
 
 
@@ -64,7 +64,7 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
         with open(infile, 'rt') as f:
             domain_chunks = chunk_list(f.read().splitlines(), chunk_size)
     except FileNotFoundError:
-        warnings.warn('Unable to open input file `%s`... File not found.' % infile)
+        warnings.warn('Unable to open input file `{0}`... File not found.'.format(infile))
         return [None]
     else:
         return domain_chunks
@@ -90,51 +90,51 @@ def scan(domain: str, timeout: int = 4) -> str:
     desc = 'None'
 
     try:
-        r = requests.get('http://' + domain + '/', timeout=timeout)
+        r = requests.get('http://{0}/'.format(domain), timeout=timeout)
         r.raise_for_status()
     except UnicodeError:
-        return domain + ',' + title + ',' + desc + ',' + 'UnicodeError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'UnicodeError')
     except exceptions.LocationValueError:
-        return domain + ',' + title + ',' + desc + ',' + 'LocationValueError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'LocationValueError')
     except exceptions.HeaderParsingError:
-        warnings.warn('Error parsing headers for %s ...' % r.url)
+        warnings.warn('Error parsing headers for {0} ...'.format(domain))
     except requests.ConnectionError:
-        return domain + ',' + title + ',' + desc + ',' + 'ConnectionError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ConnectionError')
     except requests.HTTPError:
-        return domain + ',' + title + ',' + desc + ',' + 'HTTPError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'HTTPError')
     except requests.Timeout:
-        return domain + ',' + title + ',' + desc + ',' + 'Timeout'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'Timeout')
     except requests.TooManyRedirects:
-        return domain + ',' + title + ',' + desc + ',' + 'RedirectLoop'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'RedirectLoop')
     except requests.exceptions.ContentDecodingError:
-        return domain + ',' + title + ',' + desc + ',' + 'ContentDecodingError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ContentDecodingError')
     except requests.exceptions.ChunkedEncodingError:
-        return domain + ',' + title + ',' + desc + ',' + 'ChunkedEncodingError'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ChunkedEncodingError')
     except requests.exceptions.InvalidSchema:
-        return domain + ',' + title + ',' + desc + ',' + 'InvalidSchema'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidSchema')
     except requests.exceptions.InvalidURL:
-        return domain + ',' + title + ',' + desc + ',' + 'InvalidURL'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidURL')
     except requests.exceptions.InvalidHeader:
-        return domain + ',' + title + ',' + desc + ',' + 'InvalidHeader'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidHeader')
     except requests.exceptions.FileModeWarning:
-        return domain + ',' + title + ',' + desc + ',' + 'FileModeWarning'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'FileModeWarning')
 
     try:
         root = html.fromstring(r.content)
     except html.etree.ParserError:
-        return domain + ',' + title + ',' + desc + ',' + 'Empty'
+        return '{0},{1},{2},{3}'.format(domain, title, desc, 'Empty')
 
     try:
-        title = "'" + root.xpath('/html/head/title')[0].text + "'"
+        title = "'{0}'".format(root.xpath('/html/head/title')[0].text)
     except Exception:
         title = 'None'
 
     try:
-        desc = "'" + root.xpath('/html/head/meta[@name="description"]/@content')[0] + "'"
+        desc = "'{0}'".format(root.xpath('/html/head/meta[@name="description"]/@content')[0])
     except Exception:
         desc = 'None'
 
-    return domain + ',' + title + ',' + desc + ',' + str(r.status_code)
+    return '{0},{1},{2},{3}'.format(domain, title, desc, str(r.status_code))
 
 
 def scansig(url: str, signature: str, timeout: int = 4) -> str:
