@@ -39,21 +39,21 @@ if args.scan is True and args.scansig is True:
     exit(1)
 
 if args.infile:
-    logging.info('Using user provided domain input file {0} ...'.format(args.infile))
+    logging.info('Using user provided domain input file %s ...', args.infile)
 else:
     logging.info('Using default domain input file as `--infile` was not provided at runtime ...')
 
 if args.outfile:
-    logging.info('Using user provided output log file {0} ...'.format(args.outfile))
+    logging.info('Using user provided output log file %s ...', args.outfile)
 else:
     logging.info('Using default scan output file as `--outfile` was not provided at runtime ...')
 
 if args.timeout:
     timeout = args.timeout
-    logging.info('Using user-provided network timeout of {0} ...'.format(args.timeout))
+    logging.info('Using user-provided network timeout of %i ...', args.timeout)
 else:
     timeout = 4
-    logging.info('Using default network timeout of {0} ...'.format(timeout))
+    logging.info('Using default network timeout of %i ...', timeout)
 
 if args.scan is True and args.threaded is False:
     if args.infile:
