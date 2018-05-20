@@ -88,7 +88,7 @@ def scan(domain: str, timeout: int = 4) -> str:
 
     :return: Returns a tuple of results.
     """
-    domain = domain.strip('"')
+    domain = domain.strip('"').strip('https://').partition('/')[0]
     title = 'None'
     desc = 'None'
 
@@ -183,8 +183,8 @@ def write_outfile(results: str, outfile: str = 'scanner_log.txt'):
     :return: Returns ``True`` if the operation was successful, ``False`` otherwise.
     """
     try:
-        with open(outfile, 'at') as f:
-            f.write(results)
+        with open(outfile, 'ab') as f:
+            f.write(str(results + '\n').encode())
     except FileNotFoundError:
         warnings.warn('Unable to open output file {0}'.format(outfile))
 
@@ -206,7 +206,7 @@ def write_outfile_async(iterable: list, outfile: str = 'scanner_log.txt'):
         for results in iterable:
             if results is not None:
                 try:
-                    with open(outfile, 'at') as f:
-                        f.write(results + '\n')
+                    with open(outfile, 'ab') as f:
+                        f.write(str(results + '\n').encode())
                 except FileNotFoundError:
                     warnings.warn('Unable to open output file {0}'.format(outfile))
