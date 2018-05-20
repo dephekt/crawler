@@ -93,7 +93,7 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
     if args.infile and args.chunks:
         domain_chunks = crawler.read_infile_threaded(args.infile, args.chunks)
-        print('Mapping {0} domains per chunk to worker pool ...'.format(args.chunks))
+        print('Mapping {0} domains per batch to worker pool ...'.format(args.chunks))
     elif args.infile:
         domain_chunks = crawler.read_infile_threaded(args.infile)
     elif args.chunks:
@@ -103,18 +103,18 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
     if domain_chunks[0] is None:
         warnings.warn(
-            'Unable to read any domain chunks from the provided domain input file {0} ...'.format(args.infile)
+            'Unable to read any domain batches from the provided domain input file {0} ...'.format(args.infile)
         )
         exit(1)
     else:
-        print('This workload contains {0} chunks to be processed ...'.format(domain_chunks.__len__()))
+        print('This workload contains {0} batches to be processed ...'.format(domain_chunks.__len__()))
 
     chunk_counter = 0
     log_result = False
     map_results = None
     for domains in domain_chunks:
         chunk_counter += 1
-        print('Sent {0} domains to processing so far ...'.format(str(chunk_counter * domains.__len__())))
+        print('Processing batch #{0} ...'.format(chunk_counter))
 
         if args.scansig:
             map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
@@ -125,8 +125,10 @@ if args.threaded is True and args.scan is True or args.scansig is True:
 
         elif args.scan:
             map_results = pool.map(partial(crawler.scan, timeout=timeout), domains)
-
-        if args.outfile is True and map_results is not None:
-            crawler.write_outfile_async(map_results, outfile=args.outfile)
-        elif args.outfile is False and map_results is not None:
-            crawler.write_outfile_async(map_results)
+            if args.outfile is True and map_results is not None:
+                crawler.write_outfile_async(map_results, outfile=args.outfile)
+            elif args.outfile is None and map_results is not None:
+                crawler.write_outfile_async(map_results)
+            else:
+                warnings.warn('There were no scan results to write to the output file!')
+                exit(1)
