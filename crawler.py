@@ -88,12 +88,16 @@ def scan(domain: str, timeout: int = 4) -> str:
 
     :return: Returns a tuple of results.
     """
-    domain = domain.strip('"').strip('https://').partition('/')[0]
+    domain = domain.strip('"')
+    if domain.startswith('http://'):
+        domain = domain[7:]
+    elif domain.startswith('https://'):
+        domain = domain[8:]
     title = 'None'
     desc = 'None'
 
     try:
-        r = requests.get('http://{0}/'.format(domain), timeout=timeout, verify=False)
+        r = requests.get('http://{0}'.format(domain), timeout=timeout, verify=False)
         r.raise_for_status()
     except UnicodeError:
         return '{0},{1},{2},{3}'.format(domain, title, desc, 'UnicodeError')
