@@ -162,15 +162,14 @@ def scansig(url: str, signature: str, timeout: int = 4) -> str:
     try:
         r = requests.get(url, timeout=timeout, verify=False)
         r.raise_for_status()
-    except Exception:
-        pass
+    except Exception as e:
+        return '{0},Error: "{1}"'.format(url, e)
     else:
         if r.ok:
             if r.text.find(signature) != -1:
                 print('Signature detected at {0} ...'.format(url))
                 return '{0},ScanSignatureDetected'.format(url)
             return '{0},None'.format(url)
-        return '{0},None'.format(url)
 
 
 def write_outfile(results: str, outfile: str = 'scanner_log.txt'):
