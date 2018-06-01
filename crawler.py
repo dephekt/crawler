@@ -89,15 +89,13 @@ def scan(domain: str, timeout: int = 4) -> str:
     :return: Returns a tuple of results.
     """
     domain = domain.strip('"')
-    if domain.startswith('http://'):
-        domain = domain[7:]
-    elif domain.startswith('https://'):
-        domain = domain[8:]
+    if domain.startswith('http://') is False and domain.startswith('https://') is False:
+        domain = 'http://{0}'.format(domain)
     title = 'None'
     desc = 'None'
 
     try:
-        r = requests.get('http://{0}'.format(domain), timeout=timeout, verify=False)
+        r = requests.get(domain, timeout=timeout, verify=False)
         r.raise_for_status()
     except UnicodeError:
         return '{0},{1},{2},{3}'.format(domain, title, desc, 'UnicodeError')
@@ -144,6 +142,7 @@ def scan(domain: str, timeout: int = 4) -> str:
     return '{0},{1},{2},{3}'.format(domain, title, desc, str(r.status_code))
 
 
+# pylint: disable=inconsistent-return-statements
 def scansig(url: str, signature: str, timeout: int = 4) -> str:
     """Scans a list of URLs for a given signature.
 
@@ -159,6 +158,8 @@ def scansig(url: str, signature: str, timeout: int = 4) -> str:
     :return: Returns a tuple of results.
     """
     url = str(url).strip()
+    if url.startswith('http://') is False and url.startswith('https://') is False:
+        url = 'http://{0}'.format(url)
     try:
         r = requests.get(url, timeout=timeout, verify=False)
         r.raise_for_status()
