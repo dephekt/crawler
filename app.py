@@ -110,11 +110,16 @@ if args.threaded is True and args.scan is True or args.scansig is True:
         print('This workload contains {0} batches to be processed ...'.format(domain_chunks.__len__()))
 
     chunk_counter = 0
+    batch_count = domain_chunks.__len__()
     log_result = False
     map_results = None
     for domains in domain_chunks:
         chunk_counter += 1
-        print('Processing batch #{0} ...'.format(chunk_counter))
+        print('Batch #{0}\t|\t{1}% complete\t|\t{2} batches remain'.format(
+            chunk_counter,
+            round(chunk_counter / batch_count, 3),
+            batch_count - chunk_counter,
+        ))
 
         if args.scansig:
             map_results = pool.map(partial(crawler.scansig, signature=args.sig, timeout=timeout), domains)
