@@ -1,8 +1,9 @@
 import requests
 import warnings
 from lxml import html
-from urllib3 import exceptions
 from urllib3 import disable_warnings
+from multiprocessing.dummy import Pool
+from multiprocessing import cpu_count
 
 disable_warnings()
 
@@ -36,14 +37,8 @@ def read_infile(infile: str = 'scanner_domains.txt') -> list:
 
     :return: Returns a list of domains if successful, returns a list containing ``None`` otherwise.
     """
-    try:
-        with open(infile, 'rt') as f:
-            stack = f.readlines()
-            f.close()
-            return stack
-    except FileNotFoundError:
-        warnings.warn('Unable to open input file `{0}`... File not found.'.format(infile))
-        return [None]
+    with open(infile, 'rt') as f:
+        return f.readlines()
 
 
 def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 25) -> list:
@@ -63,71 +58,86 @@ def read_infile_threaded(infile: str = 'scanner_domains.txt', chunk_size: int = 
     :return: Returns a list of domain chunks referencing lists of domains if successful, returns a list containing
         ``None`` otherwise.
     """
-    try:
-        with open(infile, 'rt') as f:
-            domain_chunks = chunk_list(f.read().splitlines(), chunk_size)
-    except FileNotFoundError:
-        warnings.warn('Unable to open input file `{0}`... File not found.'.format(infile))
-        return [None]
-    else:
-        return domain_chunks
+    with open(infile, 'rt') as f:
+        return chunk_list(f.read().splitlines(), chunk_size)
 
 
-# pylint: disable=too-many-branches
-def scan(domain: str, timeout: int = 4) -> str:
-    """Scans a list of domains for relevant metadata.
+def scan(infile: str = 'scanner_domains.txt', outfile: str = 'scanner_log.txt', signature: str = 'None'):
+    """Scans an input list for metadata and, optionally, for the presence of a given signature and sends the results to
+    be written to a file.
 
-    Currently gets the homepage of a domain and returns the domain, page title, site meta description and HTTP status
-    code of the request, if any, as a tuple of values.
-
-    :param domain: A string containing a domain to scan for metadata.
-    :type domain: str
-
-    :param timeout: The number of seconds to wait before timing out.
-    :type timeout: int
-
-    :return: Returns a tuple of results.
+    :param infile: An optional string containing the path to the input data to use for this scan.
+    :param outfile: An optional string containing the path to the output file to write results to.
+    :param signature: An optional string containing the signature to check each input item for.
     """
-    domain = domain.strip('"')
-    if domain.startswith('http://') is False and domain.startswith('https://') is False:
-        domain = 'http://{0}'.format(domain)
+    pool = Pool(cpu_count() * 10)
+    batch = read_infile_threaded(infile)
+    batch_counter = 0
+    batch_count = batch.__len__()
+    for item in batch:
+        batch_counter += 1
+        print('Batch #{0} | Batches remaining: {1} | {2}% complete'.format(
+            batch_counter,
+            batch_count - batch_counter,
+            round(100 * (batch_counter / batch_count), 3),
+        ))
+        responses = pool.map(get, item)
+        for response in responses:
+            sig_detect = 'N/A'
+            if response[0]:
+                doc_html = response[2]
+                doc_text = response[3]
+                metadata = metadata_parse(doc_html)
+                if signature != 'None':
+                    sig_detect = signature_parse(doc_text, signature)
+                write_outfile(
+                    '{0}, {1}, {2}, {3}'.format(response[1], metadata.get('title'), metadata.get('desc'), sig_detect),
+                    outfile
+                )
+            else:
+                write_outfile('{0}, \'{1}\''.format(response[1], response[2]), outfile)
+
+
+def get(target: str) -> tuple:
+    """Fetches a document via HTTP/HTTPS and returns a tuple containing a boolean indicating the result of the request,
+     the URL we attempted to contact and the request HTML content in bytes and text format, if successful.
+
+     Otherwise, returns a tuple containing a boolean indicating the result of the request, the URL we attempted to
+     contact and the HTTP status code or exception error output from the request.
+
+    :param target:
+    :return: tuple
+    """
+    if target.startswith('http://') is False and target.startswith('https://') is False:
+        target = 'http://{0}'.format(target)
+    try:
+        request = requests.get(url=target, timeout=3, verify=False)
+    except Exception as e:
+        return False, target, e.__str__()
+
+    try:
+        request.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        return False, target, e.__str__()
+    if request.ok:
+        return True, request.url, request.content, request.text
+
+    return False, request.url, request.status_code
+
+
+def metadata_parse(content: bytes) -> dict:
+    """Parses raw HTML content as bytes and returns the page's meta-description and HTML title tag values as a
+     dictionary in the form: {'title': <page title>, 'desc': <page description>}.
+
+    :param content: bytes of HTML
+    :return: dict{'title': <page title>, 'desc': <page description>}
+    """
     title = 'None'
     desc = 'None'
-
     try:
-        r = requests.get(domain, timeout=timeout, verify=False)
-        r.raise_for_status()
-    except UnicodeError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'UnicodeError')
-    except exceptions.LocationValueError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'LocationValueError')
-    except exceptions.HeaderParsingError:
-        warnings.warn('Error parsing headers for {0} ...'.format(domain))
-    except requests.ConnectionError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ConnectionError')
-    except requests.HTTPError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'HTTPError')
-    except requests.Timeout:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'Timeout')
-    except requests.TooManyRedirects:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'RedirectLoop')
-    except requests.exceptions.ContentDecodingError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ContentDecodingError')
-    except requests.exceptions.ChunkedEncodingError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'ChunkedEncodingError')
-    except requests.exceptions.InvalidSchema:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidSchema')
-    except requests.exceptions.InvalidURL:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidURL')
-    except requests.exceptions.InvalidHeader:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'InvalidHeader')
-    except requests.exceptions.FileModeWarning:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'FileModeWarning')
-
-    try:
-        root = html.fromstring(r.content)
+        root = html.fromstring(content)
     except html.etree.ParserError:
-        return '{0},{1},{2},{3}'.format(domain, title, desc, 'Empty')
+        return {'title': title, 'desc': desc}
 
     try:
         title = "'{0}'".format(root.xpath('/html/head/title')[0].text)
@@ -139,38 +149,21 @@ def scan(domain: str, timeout: int = 4) -> str:
     except Exception:
         desc = 'None'
 
-    return '{0},{1},{2},{3}'.format(domain, title, desc, str(r.status_code))
+    return {'title': title, 'desc': desc}
 
 
-# pylint: disable=inconsistent-return-statements
-def scansig(url: str, signature: str, timeout: int = 4) -> str:
-    """Scans a list of URLs for a given signature.
+def signature_parse(content: str, signature: str) -> bool:
+    """Parses given text looking for the presence of a given signature. Returns ``True`` if the signature was found,
+    ``False`` otherwise.
 
-    :param url: A string containing a URL to scan for a given signature.
-    :type url: str
-
-    :param signature: A string containing a signature to scan for.
-    :type signature: str
-
-    :param timeout: A number of seconds to wait for a request before timing out.
-    :type timeout: int
-
-    :return: Returns a tuple of results.
+    :param content: str
+    :param signature: str
+    :return: bool
     """
-    url = str(url).strip()
-    if url.startswith('http://') is False and url.startswith('https://') is False:
-        url = 'http://{0}'.format(url)
-    try:
-        r = requests.get(url, timeout=timeout, verify=False)
-        r.raise_for_status()
-    except Exception as e:
-        return '{0},Error: "{1}"'.format(url, e)
-    else:
-        if r.ok:
-            if r.text.find(signature) != -1:
-                print('Signature detected at {0} ...'.format(url))
-                return '{0},ScanSignatureDetected'.format(url)
-            return '{0},None'.format(url)
+    if content.find(signature) != -1:
+        return True
+
+    return False
 
 
 def write_outfile(results: str, outfile: str = 'scanner_log.txt'):

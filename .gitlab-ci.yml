@@ -14,4 +14,4 @@ test:
 run:
   script:
   - source $VENV_HOME_DIR/bin/activate
-  - python3 -m app --help
+  - python3 -m scan --help
