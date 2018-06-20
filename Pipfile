@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 lxml = "*"
 requests = "*"
+requests-aws4auth = "*"
+elasticsearch = "*"
 
 [dev-packages]
 pipenv = "*"
